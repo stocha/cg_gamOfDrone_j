@@ -21,6 +21,7 @@ class Player {
     
     static final boolean debug_attack_plan=true;
     static final boolean debug_defense_plan=true;
+    static final boolean debug_scores=true;
 
     final static int DISTCONT = 100;
 
@@ -29,7 +30,7 @@ class Player {
      */
     static class Forces {
 
-        public static final int nbTurns = 40;
+        public static final int nbTurns = 70;
 
         final int Z;
         int v[][];
@@ -220,6 +221,9 @@ class Player {
         final Forces maxOther;
         
         final List<Zone> filterZone= new ArrayList<>(20);
+        
+        final Integer scores[];
+        final int controlled[];
 
         Orders orders;
         
@@ -231,6 +235,12 @@ class Player {
             ID = in.nextInt(); // ID of your player (0, 1, 2, or 3)
             D = in.nextInt(); // number of drones in each team (3 to 11)
             Z = in.nextInt(); // number of zones on the map (4 to 8)          
+            
+            scores=new Integer[P];
+            for(int i=0;i<scores.length;i++){
+                scores[i]=0;
+            }
+            controlled=new int[P];
 
             for (int i = 0; i < Z; i++) {
                 int X = in.nextInt(); // corresponds to the position of the center of a zone. A zone is a circle with a radius of 100 units.
@@ -261,7 +271,16 @@ class Player {
             numTurn++;
             
             for (int i = 0; i < Z; i++) {
-                z.get(i).owner = in.nextInt();
+                int own=in.nextInt();
+                z.get(i).owner = own;
+                
+                if(own!=-1){
+                    controlled[z.get(i).owner]++;
+                    scores[own]+=1;
+                }
+                
+                if(debug_scores)
+                System.err.println("scores "+java.util.Arrays.asList(scores));
             }
             for (int i = 0; i < P; i++) {
                 for (int j = 0; j < D; j++) {
@@ -369,7 +388,7 @@ class Player {
                         
                         List<Zone> owned=filterZoneOwner();
                         
-                        if(gathered || owned.size()==0 || numTurn<45){
+                        if(gathered || owned.size()==0 || numTurn<Integer.MAX_VALUE){
                             orders.sendPacket(z.get(i).co, orders.filterDroneSelect);
                         }else{
                             
@@ -385,10 +404,7 @@ class Player {
             final Point center=new Point(2000,800);
             List<Zone> owned=filterZoneOwner();
             
-            if(owned.size()>0)
-                orders.sendPacketClosestTo(this.closestTo(center, owned).co, playDrone.get(ID),D-orders.nbCurrDone);
-            else
-                orders.sendPacketClosestTo(this.closestTo(center, z).co, playDrone.get(ID),D-orders.nbCurrDone);
+            orders.sendPacketClosestTo(this.closestTo(center, z).co, playDrone.get(ID),D-orders.nbCurrDone);
 
         }
 
