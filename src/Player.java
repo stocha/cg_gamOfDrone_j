@@ -24,7 +24,7 @@ class Player {
      */
     static class Forces {
 
-        final int nbTurns = 20;
+        public static final int nbTurns = 20;
 
         final int Z;
         int v[][];
@@ -42,16 +42,35 @@ class Player {
 
             for (int t = 0; t < nbTurns; t++) {
                 for (int z = 0; z < Z; z++) {
-                    v[z][t]=0;
+                    v[z][t] = 0;
                     for (int d = 0; d < D; d++) {
                         double dist = zones.get(z).co.distanceSq(drones.get(d));
-                        double dfut=t*DISTCONT;dfut*=dfut;
-                        
-                        if(dist < dfut) v[z][t]++;
+                        double dfut = t * DISTCONT;
+                        dfut *= dfut;
+
+                        if (dist < dfut) {
+                            v[z][t]++;
+                        }
                     }
                 }
             }
 
+        }
+
+        public void set0() {
+            for (int t = 0; t < nbTurns; t++) {
+                for (int z = 0; z < Z; z++) {
+                    v[z][t] = 0;
+                }
+            }
+        }
+
+        public void maxFrom(Forces f) {
+            for (int t = 0; t < nbTurns; t++) {
+                for (int z = 0; z < Z; z++) {
+                    v[z][t] = Math.max(f.v[z][t], v[z][t]);
+                }
+            }
         }
 
     }
@@ -67,6 +86,70 @@ class Player {
         }
     }
 
+    static class Orders {
+
+        final int D;
+        final Point orders[];
+        final boolean done[];
+
+        Orders(int D) {
+            this.D = D;
+            done = new boolean[D];
+
+            orders = new Point[D];
+            for (int i = 0; i < D; i++) {
+                orders[i] = new Point(2000, 100 + i * 100);
+            }
+        }
+
+        public void restTurn() {
+            for (int i = 0; i < D; i++) {
+                done[i] = false;
+            }
+        }
+
+        public Point get(int i) {
+            return orders[i];
+        }
+
+        public boolean sendPacketClosestTo(Point dest, List<Point> pos, int nb) {
+
+            boolean suc = true;
+            for (int sed = 0; sed < nb; sed++) {
+                suc &= sendClosestTo(dest, pos);
+            }
+
+            return suc;
+        }
+
+        public boolean sendClosestTo(Point dest, List<Point> pos) {
+
+            double minDist = Integer.MAX_VALUE;
+            int found = -1;
+            for (int i = 0; i < D; i++) {
+                if (done[i]) {
+                    continue;
+                }
+
+                double dist = dest.distanceSq(pos.get(i));
+                if (dist < minDist) {
+                    minDist = dist;
+                    found = i;
+                }
+            }
+            if (found == -1) {
+                return false;
+            }
+
+            done[found] = true;
+            orders[found].setLocation(dest);
+
+            return true;
+
+        }
+
+    }
+
     static class WorldBase {
 
         final Scanner in;
@@ -78,9 +161,13 @@ class Player {
 
         final List<Zone> z = new ArrayList<>(20);
         final List<List<Point>> playDrone = new ArrayList<>(4);
-        final List<Point> orders = new ArrayList<>(20);
-        
+
         final List<Forces> fo = new ArrayList<>(20);
+
+        final Forces maxMe;
+        final Forces maxOther;
+
+        Orders orders;
 
         WorldBase(InputStream inst) {
             this.in = new Scanner(inst);
@@ -100,12 +187,14 @@ class Player {
                 for (int j = 0; j < D; j++) {
                     playDrone.get(i).add(new Point(0, 0));
                 }
-                
+
                 fo.add(new Forces(Z));
             }
-            for (int j = 0; j < D; j++) {
-                orders.add(new Point(0, 0));
-            }
+
+            maxMe = new Forces(Z);
+            maxOther = new Forces(Z);
+
+            orders = new Orders(D);
         }
 
         private Point dco(int p, int j) {
@@ -129,12 +218,47 @@ class Player {
                 out.println("" + orders.get(i).x + " " + orders.get(i).y);
             }
         }
-        
-        public void turnCalc(){
+
+        public void turnCalc() {
             for (int i = 0; i < P; i++) {
                 fo.get(i).calc(z, playDrone.get(i));
             }
-        
+
+            maxMe.set0();
+            maxOther.set0();
+
+            for (int i = 0; i < P; i++) {
+                if (i == ID) {
+                    maxMe.maxFrom(fo.get(i));
+                } else {
+                    maxOther.maxFrom(fo.get(i));
+                }
+            }
+
+        }
+
+        public void turnPlanning() {
+
+            int drLeft = D;
+
+            for (int t = 0; t < Forces.nbTurns; t++) {
+                for (int i = 0; i < Z; i++) {
+
+                    int mother = maxOther.v[i][t];
+                    int mme = maxMe.v[i][t];
+                    if (mme > mother && z.get(i).owner != ID) {
+
+                        boolean success = true;
+                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);
+
+                        if (!success) {
+                            return;
+                        }
+                    }
+
+                }
+            }
+
         }
 
     }
@@ -146,10 +270,19 @@ class Player {
         WorldBase wb = new WorldBase(System.in);
 
         while (true) {
+            long t0 = System.currentTimeMillis();
+
             wb.readFromLoop();
             wb.turnCalc();
 
+            wb.turnPlanning();
+
             wb.writeOrders(System.out);
+
+            long t1 = System.currentTimeMillis();
+
+            double t = t1 - t0;
+            System.err.println("temps mili " + t);
         }
 
     }
