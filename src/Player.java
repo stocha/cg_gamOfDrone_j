@@ -16,6 +16,9 @@ import java.util.Scanner;
  * @author Jahan
  */
 class Player {
+    
+    static final boolean debug_attack_plan=true;
+    static final boolean debug_defense_plan=true;
 
     final static int DISTCONT = 100;
 
@@ -48,7 +51,7 @@ class Player {
                         double dfut = (t+1) * DISTCONT;
                         dfut *= dfut;
 
-                        if (dist < dfut) {
+                        if (dist <= dfut) {
                             v[z][t]++;
                         }
                     }
@@ -91,6 +94,8 @@ class Player {
         final int D;
         final Point orders[];
         final boolean done[];
+        
+        int nbCurrDone=0;
 
         Orders(int D) {
             this.D = D;
@@ -106,6 +111,8 @@ class Player {
             for (int i = 0; i < D; i++) {
                 done[i] = false;
             }
+            
+            nbCurrDone=0;
         }
 
         public Point get(int i) {
@@ -115,9 +122,13 @@ class Player {
         public boolean sendPacketClosestTo(Point dest, List<Point> pos, int nb) {
 
             boolean suc = true;
+            if(nbCurrDone+nb > D){
+                return false;
+            }
+            
             for (int sed = 0; sed < nb; sed++) {
                 suc &= sendClosestTo(dest, pos);
-                if(!suc) return suc;
+                if(!suc) throw new RuntimeException("Impossible path");
             }
 
             return suc;
@@ -141,6 +152,8 @@ class Player {
             if (found == -1) {
                 return false;
             }
+            
+            nbCurrDone++;
 
             done[found] = true;
             orders[found].setLocation(dest);
@@ -255,14 +268,16 @@ class Player {
                     int mme = maxMe.v[i][t];
                     
                     // Defense
-                    if (mme >= mother && mother>=1 && z.get(i).owner == ID && !targPlaned[i]) {
+                    if (mme >= mother && mother>=1 && (z.get(i).owner == ID || z.get(i).owner==-1 )&& !targPlaned[i]) {
                         boolean success = true;
-                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother);
-                        targPlaned[i]=true;
+                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother);                        
                         if (!success) {
-                            return;
+                            break;
                         }
-                        //System.err.println("DEFENSE OF "+i+" WITH "+mother+" crew");
+                        targPlaned[i]=true;
+                        
+                        if(debug_defense_plan)
+                        System.err.println("DEFENSE OF "+i+" WITH "+mother+" crew"+" t="+t);
                     }                    
                 }
                 
@@ -273,16 +288,19 @@ class Player {
                     // Attack
                     if (mme > mother && z.get(i).owner != ID && !targPlaned[i]) {
                         boolean success = true;
-                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);
-                        targPlaned[i]=true;
+                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);                        
                         if (!success) {
-                            return;
+                            break;
                         }
+                        targPlaned[i]=true;
+                        
+                        if(debug_attack_plan)
+                        System.err.println("ATTACK OF "+i+" WITH "+(mother +1)+" crew"+" t="+t);
                     }
                 }                
             }
             final Point center=new Point(2000,800);
-            orders.sendPacketClosestTo(center, playDrone.get(ID),100);
+            orders.sendPacketClosestTo(center, playDrone.get(ID),D-orders.nbCurrDone);
 
         }
 
