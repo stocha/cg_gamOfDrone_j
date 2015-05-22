@@ -386,15 +386,18 @@ class Player {
 
             for (int t = 0; t < Forces.nbTurns; t++) {
                 
-                if(leadScores>-10 && leadScores> -2)
                 for (int i = 0; i < Z; i++) {
 
                     int mother = maxOther.v[i][t];
                     int mme = maxMe.v[i][t];
                     
                     // Defense
+                    
                     if (mme >= mother && mother>=1 && (z.get(i).owner == ID || z.get(i).owner==-1 )&& !targPlaned[i]) {
                         boolean success = true;
+                        
+                        if(attackEnabled) mother=Math.min(P/3, mother);
+                        else mother=Math.min(P-1, mother);
                         success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother);                        
                         if (!success) {
                             break;
@@ -406,7 +409,7 @@ class Player {
                     }                    
                 }
                 
-                if(attackEnabled)
+                if(attackEnabled )
                 for (int i = 0; i < Z; i++) {
                     int mother = maxOther.v[i][t];
                     int mme = maxMe.v[i][t];                                      
@@ -438,6 +441,42 @@ class Player {
                 }                
             }
             final Point center=new Point(2000,800);
+            
+            
+            // IDLE ATTACK
+            for (int t = 0; t < Forces.nbTurns; t++) {
+                if(attackEnabled )
+                for (int i = 0; i < Z; i++) {
+                    int mother = maxOther.v[i][t];
+                    int mme = maxMe.v[i][t];                                      
+                    
+                    // Attack
+                    if (mme > mother && z.get(i).owner != ID && !targPlaned[i]) {
+                        boolean success = orders.filterSelectClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);
+                        //success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);                        
+                        if (!success) {
+                            break;
+                        }
+                        targPlaned[i]=true;
+                        
+                        boolean gathered=orders.testMinMutualDist(orders.filterDroneSelect, playDrone.get(ID)) < 50*50;
+                        
+                        List<Zone> owned=filterZoneOwner();
+                        
+                        if(gathered || owned.size()==0 || numTurn<Integer.MAX_VALUE){
+                            orders.sendPacket(z.get(i).co, orders.filterDroneSelect);
+                        }else{
+                            
+                            orders.sendPacket(this.closestTo(z.get(i).co, owned).co, orders.filterDroneSelect);
+                            
+                        }
+                        
+                        if(debug_attack_plan)
+                        System.err.println("ATTACK OF "+i+" WITH "+(mother +1)+" crew"+" t="+t);
+                    }
+                }                
+            }            
+            
             List<Zone> owned=filterZoneOwner();
             
             orders.sendPacketClosestTo(this.closestTo(center, z).co, playDrone.get(ID),D-orders.nbCurrDone);
