@@ -24,7 +24,7 @@ class Player {
      */
     static class Forces {
 
-        public static final int nbTurns = 20;
+        public static final int nbTurns = 40;
 
         final int Z;
         int v[][];
@@ -45,7 +45,7 @@ class Player {
                     v[z][t] = 0;
                     for (int d = 0; d < D; d++) {
                         double dist = zones.get(z).co.distanceSq(drones.get(d));
-                        double dfut = t * DISTCONT;
+                        double dfut = (t+1) * DISTCONT;
                         dfut *= dfut;
 
                         if (dist < dfut) {
@@ -240,8 +240,7 @@ class Player {
 
         public void turnPlanning() {
 
-            int drLeft = D;
-            
+            int drLeft = D;            
             orders.resetTurn();
             
             boolean targPlaned[]=new boolean[Z];
@@ -256,18 +255,18 @@ class Player {
                     int mme = maxMe.v[i][t];
                     
                     // Defense
-                    if (mme >= mother && z.get(i).owner == ID && !targPlaned[i]) {
+                    if (mme >= mother && mother>=1 && z.get(i).owner == ID && !targPlaned[i]) {
                         boolean success = true;
                         success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother);
                         targPlaned[i]=true;
                         if (!success) {
                             return;
                         }
+                        //System.err.println("DEFENSE OF "+i+" WITH "+mother+" crew");
                     }                    
                 }
                 
                 for (int i = 0; i < Z; i++) {
-
                     int mother = maxOther.v[i][t];
                     int mme = maxMe.v[i][t];                                      
                     
