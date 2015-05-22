@@ -17,6 +17,8 @@ import java.util.Scanner;
  */
 class Player {
     
+    // Gather attack : essentiel pour ameliorer l'existant. Une attaque se fait depuis une base, et non dans le vide
+    
     static final boolean debug_attack_plan=true;
     static final boolean debug_defense_plan=true;
 
@@ -96,6 +98,8 @@ class Player {
         final boolean done[];
         
         int nbCurrDone=0;
+        
+        List<Integer> filterDroneSelect=new ArrayList<>(20);
 
         Orders(int D) {
             this.D = D;
@@ -118,6 +122,40 @@ class Player {
         public Point get(int i) {
             return orders[i];
         }
+        
+        public boolean filterSelectClosestTo(Point dest, List<Point> pos, int nb){
+            filterDroneSelect.clear();
+            if(nbCurrDone+nb > D){
+                return false;
+            }
+            
+            for (int sed = 0; sed < nb; sed++) {
+                int it=sendClosestTo(dest, pos);
+                filterDroneSelect.add(it);
+            }
+            
+            return true;
+        }
+        
+        public int testMinMutualDist(List<Integer> them,List<Point> pos){
+            double r=0;
+            for(int i=0;i<them.size();i++){
+                for(int j=0;j<them.size();j++){
+                    int a=them.get(i);
+                    int b=them.get(j);
+                    
+                    double di=pos.get(a).distanceSq(pos.get(b));
+                    if(di>r) r=di;
+                }                
+            }
+            return (int)r;
+        }
+        
+         public void sendPacket(Point dest,List<Integer> them) {
+             for(Integer i : them){
+                 orders[i].setLocation(dest);
+             }
+         }
 
         public boolean sendPacketClosestTo(Point dest, List<Point> pos, int nb) {
 
@@ -127,14 +165,14 @@ class Player {
             }
             
             for (int sed = 0; sed < nb; sed++) {
-                suc &= sendClosestTo(dest, pos);
+                suc &= (sendClosestTo(dest, pos)!=-1);
                 if(!suc) throw new RuntimeException("Impossible path");
             }
 
             return suc;
         }
 
-        public boolean sendClosestTo(Point dest, List<Point> pos) {
+        public int sendClosestTo(Point dest, List<Point> pos) {
 
             double minDist = Integer.MAX_VALUE;
             int found = -1;
@@ -150,7 +188,7 @@ class Player {
                 }
             }
             if (found == -1) {
-                return false;
+                return found;
             }
             
             nbCurrDone++;
@@ -158,7 +196,7 @@ class Player {
             done[found] = true;
             orders[found].setLocation(dest);
 
-            return true;
+            return found;
 
         }
 
@@ -180,6 +218,8 @@ class Player {
 
         final Forces maxMe;
         final Forces maxOther;
+        
+        final List<Zone> filterZone= new ArrayList<>(20);
 
         Orders orders;
 
@@ -225,6 +265,33 @@ class Player {
                 }
 
             }
+        }
+        
+        List<Zone> filterZoneOwner(){
+            filterZone.clear();
+            
+            for(int i=0;i<Z;i++){
+                if(z.get(i).owner==ID || z.get(i).owner==-1){
+                    filterZone.add(z.get(i));
+                }
+            
+            }
+            
+            return filterZone;
+        }
+        
+        Zone closestTo(Point dst,List<Zone> them){
+            double minDist=Integer.MAX_VALUE;
+            int r=-1;
+            
+            for(int i=0;i<them.size();i++){
+                double d=them.get(i).co.distanceSq(dst);
+                if(d<minDist){
+                    minDist=d;
+                    r=i;
+                }
+            }
+            return them.get(r);
         }
 
         public void writeOrders(PrintStream out) {
@@ -287,12 +354,22 @@ class Player {
                     
                     // Attack
                     if (mme > mother && z.get(i).owner != ID && !targPlaned[i]) {
-                        boolean success = true;
-                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);                        
+                        boolean success = orders.filterSelectClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);
+                        //success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);                        
                         if (!success) {
                             break;
                         }
                         targPlaned[i]=true;
+                        
+                        boolean gathered=orders.testMinMutualDist(orders.filterDroneSelect, playDrone.get(ID)) < 50*50;
+                        
+                        if(gathered){
+                            orders.sendPacket(z.get(i).co, orders.filterDroneSelect);
+                        }else{
+                            List<Zone> owned=filterZoneOwner();
+                            orders.sendPacket(this.closestTo(z.get(i).co, owned).co, orders.filterDroneSelect);
+                            
+                        }
                         
                         if(debug_attack_plan)
                         System.err.println("ATTACK OF "+i+" WITH "+(mother +1)+" crew"+" t="+t);
