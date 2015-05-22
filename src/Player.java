@@ -21,7 +21,7 @@ class Player {
     
     static final boolean debug_attack_plan=true;
     static final boolean debug_defense_plan=true;
-    static final boolean debug_scores=true;
+    static final boolean debug_scores=false;
 
     final static int DISTCONT = 100;
 
@@ -262,6 +262,32 @@ class Player {
 
             orders = new Orders(D);
         }
+        
+        private int leadScore(){
+            int mine=scores[ID];
+            
+            int diff=Integer.MAX_VALUE;
+            for(int i=0;i<P;i++){
+                if(i==ID) continue;
+                int diloc=mine-scores[i];
+                if(diloc < diff) diff=diloc;
+            
+            }
+            return diff;
+        }
+        
+        private int leadControl(){
+            int mine=controlled[ID];
+            
+            int diff=Integer.MAX_VALUE;
+            for(int i=0;i<P;i++){
+                if(i==ID) continue;
+                int diloc=mine-controlled[i];
+                if(diloc < diff) diff=diloc;
+            
+            }
+            return diff;            
+        }
 
         private Point dco(int p, int j) {
             return playDrone.get(p).get(j);
@@ -350,8 +376,17 @@ class Player {
             for(int i=0;i<Z;i++){
                 targPlaned[i]=false;
             }
+            
+            int leadControlled=leadControl();
+            int leadScores=leadScore();
+            
+                boolean attackEnabled=(leadControlled < 0 || (leadControlled==0 && leadScores <= 0));
+                if(debug_attack_plan)
+                    System.err.println("Attack is ON "+attackEnabled+"  leadC "+leadControlled+" leadS "+leadScores);            
 
             for (int t = 0; t < Forces.nbTurns; t++) {
+                
+                if(leadScores>-10 && leadScores> -2)
                 for (int i = 0; i < Z; i++) {
 
                     int mother = maxOther.v[i][t];
@@ -371,6 +406,7 @@ class Player {
                     }                    
                 }
                 
+                if(attackEnabled)
                 for (int i = 0; i < Z; i++) {
                     int mother = maxOther.v[i][t];
                     int mme = maxMe.v[i][t];                                      
