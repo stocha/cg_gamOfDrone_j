@@ -243,23 +243,44 @@ class Player {
             int drLeft = D;
             
             orders.resetTurn();
+            
+            boolean targPlaned[]=new boolean[Z];
+            for(int i=0;i<Z;i++){
+                targPlaned[i]=false;
+            }
 
             for (int t = 0; t < Forces.nbTurns; t++) {
                 for (int i = 0; i < Z; i++) {
 
                     int mother = maxOther.v[i][t];
                     int mme = maxMe.v[i][t];
-                    if (mme > mother && z.get(i).owner != ID) {
+                    
+                    // Defense
+                    if (mme >= mother && z.get(i).owner == ID && !targPlaned[i]) {
+                        boolean success = true;
+                        success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother);
+                        targPlaned[i]=true;
+                        if (!success) {
+                            return;
+                        }
+                    }                    
+                }
+                
+                for (int i = 0; i < Z; i++) {
 
+                    int mother = maxOther.v[i][t];
+                    int mme = maxMe.v[i][t];                                      
+                    
+                    // Attack
+                    if (mme > mother && z.get(i).owner != ID && !targPlaned[i]) {
                         boolean success = true;
                         success &= orders.sendPacketClosestTo(z.get(i).co, playDrone.get(ID), mother + 1);
-
+                        targPlaned[i]=true;
                         if (!success) {
                             return;
                         }
                     }
-
-                }
+                }                
             }
             final Point center=new Point(2000,800);
             orders.sendPacketClosestTo(center, playDrone.get(ID),100);
