@@ -102,7 +102,7 @@ class Player {
             }
         }
 
-        public void restTurn() {
+        public void resetTurn() {
             for (int i = 0; i < D; i++) {
                 done[i] = false;
             }
@@ -117,6 +117,7 @@ class Player {
             boolean suc = true;
             for (int sed = 0; sed < nb; sed++) {
                 suc &= sendClosestTo(dest, pos);
+                if(!suc) return suc;
             }
 
             return suc;
@@ -240,6 +241,8 @@ class Player {
         public void turnPlanning() {
 
             int drLeft = D;
+            
+            orders.resetTurn();
 
             for (int t = 0; t < Forces.nbTurns; t++) {
                 for (int i = 0; i < Z; i++) {
@@ -258,6 +261,8 @@ class Player {
 
                 }
             }
+            final Point center=new Point(2000,800);
+            orders.sendPacketClosestTo(center, playDrone.get(ID),100);
 
         }
 
