@@ -222,6 +222,8 @@ class Player {
         final List<Zone> filterZone= new ArrayList<>(20);
 
         Orders orders;
+        
+        int numTurn=0;
 
         WorldBase(InputStream inst) {
             this.in = new Scanner(inst);
@@ -256,6 +258,8 @@ class Player {
         }
 
         public void readFromLoop() {
+            numTurn++;
+            
             for (int i = 0; i < Z; i++) {
                 z.get(i).owner = in.nextInt();
             }
@@ -363,10 +367,12 @@ class Player {
                         
                         boolean gathered=orders.testMinMutualDist(orders.filterDroneSelect, playDrone.get(ID)) < 50*50;
                         
-                        if(gathered){
+                        List<Zone> owned=filterZoneOwner();
+                        
+                        if(gathered || owned.size()==0 || numTurn<45){
                             orders.sendPacket(z.get(i).co, orders.filterDroneSelect);
                         }else{
-                            List<Zone> owned=filterZoneOwner();
+                            
                             orders.sendPacket(this.closestTo(z.get(i).co, owned).co, orders.filterDroneSelect);
                             
                         }
@@ -377,7 +383,12 @@ class Player {
                 }                
             }
             final Point center=new Point(2000,800);
-            orders.sendPacketClosestTo(center, playDrone.get(ID),D-orders.nbCurrDone);
+            List<Zone> owned=filterZoneOwner();
+            
+            if(owned.size()>0)
+                orders.sendPacketClosestTo(this.closestTo(center, owned).co, playDrone.get(ID),D-orders.nbCurrDone);
+            else
+                orders.sendPacketClosestTo(this.closestTo(center, z).co, playDrone.get(ID),D-orders.nbCurrDone);
 
         }
 
@@ -388,6 +399,8 @@ class Player {
      */
     public static void main(String[] args) {
         WorldBase wb = new WorldBase(System.in);
+        
+        int numTurn=0;
 
         while (true) {
             long t0 = System.currentTimeMillis();
@@ -403,6 +416,7 @@ class Player {
 
             double t = t1 - t0;
             System.err.println("temps mili " + t);
+            numTurn++;
         }
 
     }
