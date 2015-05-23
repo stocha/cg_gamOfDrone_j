@@ -110,6 +110,11 @@ public class GraphicLib2dTests {
         Assert.assertEquals("java.awt.Point[x=0,y=0]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
         Assert.assertEquals("java.awt.Point[x=-20,y=-20]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 30));        
         
+        zer.cord().setLocation(0,0);
+        dir.cord().setLocation(1,1);
+        Assert.assertEquals("java.awt.Point[x=1,y=1]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        Assert.assertEquals("java.awt.Point[x=71,y=71]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 100));         
+        
         //System.out.println();
         
         List<P> l= Arrays.asList(new P(-30,-10), new P(30,-10),new P(0,10));

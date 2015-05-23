@@ -20,9 +20,9 @@ import java.util.Scanner;
 public class PlayerLib {
     
     private static boolean debug_base=true;
-    private static boolean debug_players=true;    
+    private static boolean debug_players=false;    
     private static boolean debug_drones=true;
-    private static boolean debug_zones=true;
+    private static boolean debug_zones=false;
 
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
@@ -45,10 +45,14 @@ public class PlayerLib {
         public void set(Point c) {
             cord.setLocation(c);
         }
+        
+        public double distToOrigin(){
+            return Math.sqrt(cord.x*cord.x+cord.y*cord.y);
+        }
 
         @Override
         public String toString() {
-            return "GamePos{" + "cord=" + cord + '}';
+            return "(" + cord.x +"|"+cord.y+ ")";
         }
         
         
@@ -252,7 +256,7 @@ public class PlayerLib {
                 for(int z=0;z<Z;z++){
                     if(_owner[z]==it.id) owned.add(z);
                 }
-                it.controlHistorique.add(owned);  
+                it.controlHistorique.addFirst(owned);  
                 it.nbControlled=owned.size();
             }              
             
@@ -267,12 +271,12 @@ public class PlayerLib {
                     PlayerLib.GamePos vc=new PlayerLib.GamePos();
                     
                     if(!it.coords.isEmpty()){
-                        GraphicLib2d.WithCoord prev=it.coords.getLast();
+                        GraphicLib2d.WithCoord prev=it.coords.getFirst();
                         vc.cord.setLocation(cc.cord.x-prev.cord().x,cc.cord.y-prev.cord().y);
                     }
                     
-                    it.speeds.add(vc);       
-                    it.coords.add(cc);
+                    it.speeds.addFirst(vc);       
+                    it.coords.addFirst(cc);
                     
                 }                
                 
