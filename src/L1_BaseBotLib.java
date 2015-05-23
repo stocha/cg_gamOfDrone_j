@@ -123,7 +123,8 @@ public class L1_BaseBotLib {
            double norm=vecpos.x*vecpos.x+vecpos.y*vecpos.y;
            norm=Math.sqrt(norm);
             
-            if(res<=0) return res;
+           if(res==0) return 40;
+            if(res<0) return 80;
             return (int)norm/res;
         
         }
