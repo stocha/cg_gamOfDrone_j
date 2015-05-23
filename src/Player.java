@@ -166,10 +166,14 @@ public static class PlayerLib
         public void set(Point c) {
             cord.setLocation(c);
         }
+        
+        public double distToOrigin(){
+            return Math.sqrt(cord.x*cord.x+cord.y*cord.y);
+        }
 
         @Override
         public String toString() {
-            return "(" + cord.x +"|"+cord.y+ ")";
+            return "(" + cord.x +"|"+cord.y+"["+(int)distToOrigin()+"]" +")";
         }
         
         
@@ -424,6 +428,7 @@ public static class PlayerLib
 
     }
 }
+
 
 
 

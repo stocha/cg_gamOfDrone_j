@@ -52,7 +52,7 @@ public class PlayerLib {
 
         @Override
         public String toString() {
-            return "(" + cord.x +"|"+cord.y+ ")";
+            return "(" + cord.x +"|"+cord.y+"["+(int)distToOrigin()+"]" +")";
         }
         
         
@@ -114,6 +114,7 @@ public class PlayerLib {
 
         final double avg_zoneForPlayer;
         final double avg_dronePerZone;
+        final double avg_dronePerLegitimateZone;
         private final Point[] _worldZoneCoord;        
 
         int _turn_Number;
@@ -159,6 +160,7 @@ public class PlayerLib {
 
             avg_zoneForPlayer = (double) Z / (double) P;
             avg_dronePerZone = (double) D / (double) Z;
+            avg_dronePerLegitimateZone = (double) D / (double) avg_zoneForPlayer;
 
             players = new ArrayList<>(P);
             zones = new ArrayList<>(Z);
@@ -291,7 +293,11 @@ public class PlayerLib {
                 if(debug_drones)
                     System.err.println(""+playerDrones);
                 System.err.println("Turn "+_turn_Number);
-                System.err.println("Control "+Arrays.asList(_turn_scoreControl));
+                System.err.println("Control ");
+                for(int p=0;p<P;p++){
+                    System.err.print("|"+_turn_scoreControl[p]);
+                }
+                System.err.println("drone/zone zone/player drone/legit "+this.avg_dronePerZone+" "+this.avg_zoneForPlayer+" "+this.avg_dronePerLegitimateZone);
             }
         }
 
