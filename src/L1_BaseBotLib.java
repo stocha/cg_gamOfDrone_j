@@ -69,6 +69,7 @@ public class L1_BaseBotLib {
         final ArrayDeque<L1_BaseBotLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
 
         int id;
+        int owner;
 
         @Override
         public String toString() {
@@ -216,6 +217,7 @@ public class L1_BaseBotLib {
                 for (int d = 0; d < D; d++) {
                     Dt n = newdrone();
                     n.id = d;
+                    n.owner=p;
                     playerDrones.get(p).add(n);
                 }
             }

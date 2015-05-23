@@ -136,7 +136,8 @@ class Player {
     
 }
 
-public static class L1_BaseBotLib {
+
+   public static class L1_BaseBotLib {
     
     private static boolean debug_base=true;
     private static boolean debug_players=false;    
@@ -148,6 +149,9 @@ public static class L1_BaseBotLib {
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
     static final int supposedMaxTurn=700;
+    
+    static final int lvl0Dist=100;
+    static final int maxSpeed=100;
 
     interface Factory<E> {
 
@@ -211,7 +215,10 @@ public static class L1_BaseBotLib {
             return "ZoneBase{" + "id=" + id + ", owner=" + owner + ", turnowned=" + turnowned + '}';
         }
         
-        
+        public int coucheLevel(L0_GraphicLib2d.WithCoord cc){
+            double dd = this.cord.distance(cc.cord());
+            return (int)dd/lvl0Dist;
+        }
 
     }
 
@@ -223,7 +230,12 @@ public static class L1_BaseBotLib {
 
         @Override
         public String toString() {
-            return "PlayerBase{" + "id=" + id + ", nbControlled=" + nbControlled + ", controlHistorique=" + controlHistorique + '}';
+            String res=" "+ "id=" + id + ", nbControlled=" + nbControlled;
+            
+            if(debug_droneHistory)
+                res+="PlayerBase{" + "id=" + id + ", nbControlled=" + nbControlled + ", controlHistorique=" + controlHistorique + '}';
+            
+            return res;
         }
         
         
@@ -440,9 +452,11 @@ public static class L1_BaseBotLib {
     }
 }
 
+   
+   
 
 
-public static class L3_FirstBot {
+public  static class L3_FirstBot {
     
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
@@ -466,7 +480,8 @@ public static class L3_FirstBot {
             created,
             success,
             running,
-            canceled
+            canceled,
+            suspended,
         }  
         public static enum AbortReason{
             takenByEnemy,
@@ -508,6 +523,20 @@ public static class L3_FirstBot {
             return "Mission{" + "type=" + type + ", turnCreation=" + turnCreation + ", turnExpectedEnd=" + turnExpectedEnd + ", turnCanceled=" + turnCanceled + ", status=" + status + ", assignedResource=" + assignedResource + ", distanceSqToFirstDrone=" + distanceSqToFirstDrone + '}';
         }
         
+        public boolean enCours(){
+            if( missionTarget.owner!=context.ID){
+                boolean allThere=true;
+                for(Drone d : assignedResource){
+                    if (missionTarget.coucheLevel(d)>0){
+                        allThere&=false;
+                    }
+                }
+                return !allThere;            
+            }
+            
+            return false;
+        }
+        
         
         public void applyResourcesOrders(Point[] ordersOut){
             for(Drone d : this.assignedResource){
@@ -535,6 +564,25 @@ public static class L3_FirstBot {
 
         public Bot(InputStream inst) {
             super(inst);
+        }
+        
+        private void decomissionMissionInitConquest(){
+            
+            missionTransfert.clear();
+            droneTransfert.clear();
+            for(Mission mi : missionActives){
+                if(!mi.enCours()){
+                    missionTransfert.add(mi);
+                }                
+            }
+            for(Mission mi : missionTransfert){
+                freeDrone.addAll(mi.assignedResource);
+                mi.assignedResource.clear();
+            }            
+            
+            missionActives.removeAll(missionTransfert);
+            missionTransfert.clear();
+            
         }
         
         private void examineAndPlanMissionInitConquestProposed(){
@@ -579,6 +627,12 @@ public static class L3_FirstBot {
            }            
             
         }
+        
+        private void markFreeDrone(){
+            for(Drone d : freeDrone){
+                _orders[d.id].setLocation(new Point(0,0));
+            }
+        }
 
         @Override
         void doPrepareOrder() {
@@ -595,6 +649,10 @@ public static class L3_FirstBot {
                         missionInitConquestProposed.add(conq);
                     }
                 }                
+            }else{
+                decomissionMissionInitConquest();
+                markFreeDrone();
+            
             }
 
             
