@@ -486,7 +486,7 @@ public static class L1_BaseBotLib {
    
 public static class L3_FirstBot {
     
-    static final boolean debugPlanner=true;
+    static final boolean debugPlanner=false;
     
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
@@ -580,9 +580,55 @@ public static class L3_FirstBot {
     }
     
     public static class AttackDefPlanner{
+        
+        public class MissionAttack{
+            List<Drone> assignedResource=new ArrayList<>(L1_BaseBotLib.maxDrones);
+            Zone missionTarget=null;    
+            
+            int nbTurns=5;
+            boolean done=false;
+            
+            MissionAttack(Zone cible){
+                missionTarget=cible;
+            }
+            
+            void captureRessource(){
+                if(done) return;
+                
+                if(assignedResource.size()>=(int)context.avg_dronePerLegitimateZone) return;
+                for(int i=0;i<4;i++){
+                    if(context.freeDrone.isEmpty()) break;
+                    
+                    assignedResource.add(context.freeDrone.get(0));
+                    context.freeDrone.removeAll(assignedResource);
+                }
+            }
+            
+            void releaseRessource(){
+                if(done || assignedResource.isEmpty()) return;
+                
+                Drone d=L0_GraphicLib2d.farthestFrom(missionTarget,assignedResource);
+                
+                if(d.cord.distance(missionTarget.cord)<L1_BaseBotLib.lvl0Dist){
+                    nbTurns--;
+                }
+                
+                if(nbTurns<=0){
+                    context.freeDrone.addAll(assignedResource);
+                    assignedResource.clear();
+                    done=true;
+                }
+            }
+            
+            boolean isDone(){
+                return done;
+            }
+            
+        }
+        
         final static int maxEtaCalc=60;
         
-        final Bot context;
+        Bot context=null;
         private final List<List<Drone>> sectorMenac;
         private final List<List<Integer>> etamenace;
         private final List<Drone> sectorRessource;
@@ -595,6 +641,8 @@ public static class L3_FirstBot {
             }
             return inst;
         }
+        
+        private final List<MissionAttack> mission=new ArrayList<>(40);
 
         public AttackDefPlanner(Bot context) {
             this.context = context;
@@ -694,12 +742,19 @@ public static class L3_FirstBot {
                     System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone+1));
                 }
                 
-                if(eta>4){
-                    for(Drone m : context.freeDrone){
-                        context._orders[ m.id].setLocation(zr.cord);
-                    }
+                if(eta>5){
+                    mission.add(new MissionAttack(zr));
                 }
             }
+            
+            List<MissionAttack> rm=new ArrayList<>();
+            for(MissionAttack a : mission){
+                a.captureRessource();
+                a.releaseRessource();
+                if(a.isDone()) rm.add(a);
+            }
+            
+            mission.removeAll(rm);
             
         }
     }
@@ -849,6 +904,7 @@ public static class L3_FirstBot {
     }    
     
 }
+
 
 
 
