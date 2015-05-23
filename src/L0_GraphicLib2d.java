@@ -26,7 +26,7 @@ public class L0_GraphicLib2d {
         T max=null;
         for(T w : them){
             double dist= cc.cord().distanceSq(w.cord());
-            if(dist > maxDist){
+            if(dist >= maxDist){
                 maxDist=dist;
                 max=w;
             }
@@ -39,7 +39,7 @@ public class L0_GraphicLib2d {
         T min=null;
         for(T w : them){
             double dist= cc.cord().distanceSq(w.cord());
-            if(dist < minDist){
+            if(dist <= minDist){
                 minDist=dist;
                 min=w;
             }
@@ -95,7 +95,7 @@ public class L0_GraphicLib2d {
         for(T w : them) for(T w2 : them){
             if(w==w2) continue;
             double dist= w2.cord().distanceSq(w.cord());
-            if(dist > maxDist){
+            if(dist >= maxDist){
                 maxDist=dist;
                 A=w;B=w2;
             }

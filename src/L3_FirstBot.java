@@ -1,4 +1,5 @@
 
+import com.sun.management.jmx.Trace;
 import java.awt.Point;
 import java.io.InputStream;
 import java.util.ArrayDeque;
@@ -115,6 +116,15 @@ public class L3_FirstBot {
     public static class AttackDefPlanner{
         
         public class MissionAttack{
+
+            @Override
+            public String toString() {
+                return "MissionAttack{" + "assignedResource=" + assignedResource.size() + ", missionTarget=" + missionTarget.id + ", nbTurns=" + nbTurns + ", done=" + done + '}';
+            }
+            
+            
+            
+            
             List<Drone> assignedResource=new ArrayList<>(L1_BaseBotLib.maxDrones);
             Zone missionTarget=null;    
             
@@ -134,6 +144,12 @@ public class L3_FirstBot {
                     
                     assignedResource.add(context.freeDrone.get(0));
                     context.freeDrone.removeAll(assignedResource);
+                }
+            }
+            
+            void sendDrones(){
+                for(Drone d : assignedResource){
+                    context._orders[d.id].setLocation(missionTarget.cord);
                 }
             }
             
@@ -275,7 +291,7 @@ public class L3_FirstBot {
                     System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone+1));
                 }
                 
-                if(eta>5){
+                if(eta>5 && context.freeDrone.size()>1 && mission.size() < 5){
                     mission.add(new MissionAttack(zr));
                 }
             }
@@ -285,6 +301,7 @@ public class L3_FirstBot {
                 a.captureRessource();
                 a.releaseRessource();
                 if(a.isDone()) rm.add(a);
+                a.sendDrones();
             }
             
             mission.removeAll(rm);

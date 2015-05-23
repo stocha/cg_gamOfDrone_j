@@ -21,7 +21,8 @@ import java.util.Scanner;
  * @author Jahan
  */
 class Player {
-   public static class L0_GraphicLib2d {
+
+    public static class L0_GraphicLib2d {
     
     public interface WithCoord{
         Point cord();
@@ -33,7 +34,7 @@ class Player {
         T max=null;
         for(T w : them){
             double dist= cc.cord().distanceSq(w.cord());
-            if(dist > maxDist){
+            if(dist >= maxDist){
                 maxDist=dist;
                 max=w;
             }
@@ -46,7 +47,7 @@ class Player {
         T min=null;
         for(T w : them){
             double dist= cc.cord().distanceSq(w.cord());
-            if(dist < minDist){
+            if(dist <= minDist){
                 minDist=dist;
                 min=w;
             }
@@ -102,7 +103,7 @@ class Player {
         for(T w : them) for(T w2 : them){
             if(w==w2) continue;
             double dist= w2.cord().distanceSq(w.cord());
-            if(dist > maxDist){
+            if(dist >= maxDist){
                 maxDist=dist;
                 A=w;B=w2;
             }
@@ -135,6 +136,7 @@ class Player {
     }     
     
 }
+
 
 
 public static class L1_BaseBotLib {
@@ -483,7 +485,6 @@ public static class L1_BaseBotLib {
 }
 
 
-   
 public static class L3_FirstBot {
     
     static final boolean debugPlanner=false;
@@ -582,6 +583,15 @@ public static class L3_FirstBot {
     public static class AttackDefPlanner{
         
         public class MissionAttack{
+
+            @Override
+            public String toString() {
+                return "MissionAttack{" + "assignedResource=" + assignedResource.size() + ", missionTarget=" + missionTarget.id + ", nbTurns=" + nbTurns + ", done=" + done + '}';
+            }
+            
+            
+            
+            
             List<Drone> assignedResource=new ArrayList<>(L1_BaseBotLib.maxDrones);
             Zone missionTarget=null;    
             
@@ -601,6 +611,12 @@ public static class L3_FirstBot {
                     
                     assignedResource.add(context.freeDrone.get(0));
                     context.freeDrone.removeAll(assignedResource);
+                }
+            }
+            
+            void sendDrones(){
+                for(Drone d : assignedResource){
+                    context._orders[d.id].setLocation(missionTarget.cord);
                 }
             }
             
@@ -742,7 +758,7 @@ public static class L3_FirstBot {
                     System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone+1));
                 }
                 
-                if(eta>5){
+                if(eta>5 && context.freeDrone.size()>1 && mission.size() < 5){
                     mission.add(new MissionAttack(zr));
                 }
             }
@@ -752,6 +768,7 @@ public static class L3_FirstBot {
                 a.captureRessource();
                 a.releaseRessource();
                 if(a.isDone()) rm.add(a);
+                a.sendDrones();
             }
             
             mission.removeAll(rm);
@@ -904,6 +921,8 @@ public static class L3_FirstBot {
     }    
     
 }
+
+
 
 
 
