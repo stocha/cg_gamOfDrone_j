@@ -281,11 +281,42 @@ public class L3_FirstBot {
             return min;
         }
         
+        int calcMenace(Zone zr){
+            int countP[] = new int[context.P];
+            
+            {
+            int i=0;
+                for(Drone d : sectorMenac.get(zr.id)){
+                    if(etamenace.get(zr.id).get(i)<10){
+                        countP[d.owner]++;
+                    }
+                    i++;
+                }
+            }
+            
+            int max=-1;
+            for(int i=0;i<countP.length;i++){
+                if(max>countP[i]) max=countP[i];
+            }
+            
+            return max;
+        }
+        
         public void plan(){
             List<Zone> mine=new ArrayList<>();
             List<Zone> ene=new ArrayList<>();
             
             if(debugPlanner) {System.err.println(""+etamenace);}
+            
+            for(Zone zr : context.zones){
+                if(zr.owner!=context.ID) continue;
+                    int szMen=calcMenace(zr);                
+                    int count=sectorRessource.size();
+
+                
+                
+                mission.add(new MissionAttack(zr,szMen+1 - count));
+            }
             
             for(Zone zr : context.zones){                
                 if(zr.owner==context.ID) mine.add(zr);
@@ -297,7 +328,7 @@ public class L3_FirstBot {
                     System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone));
                 }
                 
-                if(eta>5 && mission.size() < context.Z && zr.owner!=context.ID){
+                if(eta>5 && mission.size() < 3 && zr.owner!=context.ID){
                     mission.add(new MissionAttack(zr,(int)context.avg_dronePerLegitimateZone+1));
                 }
             }
@@ -309,8 +340,18 @@ public class L3_FirstBot {
                 if(a.isDone()) rm.add(a);
                 a.sendDrones();
             }
+                       
             
             mission.removeAll(rm);
+            
+            Point center=null;
+            if(!mine.isEmpty()){
+                center=L0_GraphicLib2d.baryCenter(mine);
+            }
+            if(center==null) center=new Point(2000,800);
+            for(Drone d: context.freeDrone){
+                context._orders[d.id].setLocation(center);
+            }
             
         }
     }
