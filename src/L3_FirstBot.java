@@ -110,6 +110,96 @@ public class L3_FirstBot {
         
     }
     
+    public static class AttackDefPlanner{
+        final static int maxEtaCalc=60;
+        
+        final Bot context;
+        private final List<List<Drone>> sectorMenac;
+        private final List<List<Integer>> etamenace;
+        private final List<Drone> sectorRessource;
+        private final List<Integer> etaressourceEta;
+        
+        private static AttackDefPlanner inst=null;
+        private static AttackDefPlanner inst(Bot con){
+            if(inst==null){
+                inst=new AttackDefPlanner(con);
+            }
+            return inst;
+        }
+
+        public AttackDefPlanner(Bot context) {
+            this.context = context;
+            
+            sectorMenac=new ArrayList<>(context.Z);
+            etamenace=new ArrayList<>(context.Z);
+            for(int z=0;z<context.Z;z++){
+                sectorMenac.add(new ArrayList<>(context.D));
+                etamenace.add(new ArrayList<>(context.D));
+            }
+            sectorRessource=new ArrayList<>(context.D);
+            etaressourceEta=new ArrayList<>(context.D);
+        }
+        
+        public void calcNamedMenaces(){
+            
+            // Clear
+            for(int i=0;i<sectorMenac.size();i++){
+                sectorMenac.get(i).clear();
+                etamenace.get(i).clear();
+            }
+           sectorRessource.clear();
+           etaressourceEta.clear();
+           
+           // parcours bots et sector           
+           for(int z=0;z<context.Z;z++){
+               Zone zo=context.zones.get(z);
+               
+               for(int p=0;p<context.P;p++){
+                   for(int d=0;d<context.D;d++){
+                       Drone dr =context.playerDrones.get(p).get(d);
+                       
+                       int etapes=zo.coucheLevel(dr);
+                       int etan=zo.headingLevel(dr);
+                       if(etapes <=2) etan=0;
+                       
+                       if(etan <maxEtaCalc){
+                           if(p==context.ID){
+                               sectorRessource.add(dr);
+                               etaressourceEta.add(etapes);
+                           }else{
+                               sectorMenac.get(z).add(dr);
+                               etamenace.get(z).add(etan);
+                           }
+                       }
+                   }
+               
+               }
+               
+           }
+        }// CalcMenace
+        
+        public int etaForMenaceLevel(Zone zr,int lvl){
+            int[][] nbThreadPerEta=new int[context.P][maxEtaCalc];
+            
+            List<Drone> menDr=sectorMenac.get(zr.id);
+            for(int i=0;i<menDr.size();i++){
+                Drone dr=menDr.get(i);
+                nbThreadPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;
+            }
+        }
+        
+        public void plan(){
+            List<Zone> mine=new ArrayList<>();
+            List<Zone> ene=new ArrayList<>();
+            
+            for(Zone zr : context.zones){
+                if(zr.owner==context.ID) mine.add(zr);
+                else if(zr.owner==-1) ene.add(zr);
+            }
+            
+        }
+    }
+    
 
     public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{      
             
