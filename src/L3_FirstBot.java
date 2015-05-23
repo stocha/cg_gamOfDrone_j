@@ -1,4 +1,5 @@
 
+import java.awt.Point;
 import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -79,6 +80,14 @@ public class L3_FirstBot {
         }
         
         
+        public void applyResourcesOrders(Point[] ordersOut){
+            for(Drone d : this.assignedResource){
+                ordersOut[d.id].setLocation(missionTarget.cord);
+            
+            }
+        }
+        
+        
         
     }
     
@@ -117,6 +126,16 @@ public class L3_FirstBot {
            missionInitConquestProposed.removeAll(missionTransfert);
            missionActives.addAll(missionTransfert);
            missionTransfert.clear();
+           
+           freeDrone.removeAll(droneTransfert);
+           droneTransfert.clear();
+            
+        }
+        
+        private void applyMissionPlanning(){
+           for(Mission mi : missionInitConquestProposed){
+               mi.applyResourcesOrders(this._orders);
+           }            
             
         }
 
