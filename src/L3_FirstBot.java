@@ -179,13 +179,30 @@ public class L3_FirstBot {
         }// CalcMenace
         
         public int etaForMenaceLevel(Zone zr,int lvl){
-            int[][] nbThreadPerEta=new int[context.P][maxEtaCalc];
+            int[][] nbThreatPerEta=new int[context.P][maxEtaCalc];
             
             List<Drone> menDr=sectorMenac.get(zr.id);
             for(int i=0;i<menDr.size();i++){
                 Drone dr=menDr.get(i);
-                nbThreadPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;
+                nbThreatPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;
             }
+            
+            int[] etaPerPlayer=new int[context.P];
+            for(int p=0;p<context.P;p++){
+                int count=0;
+                for(int t=0;t<lvl;t++){
+                    count+=nbThreatPerEta[p][t];
+                }
+                etaPerPlayer[p]=count;
+            }
+            
+            int min=Integer.MAX_VALUE;
+            for(int i=0;i<context.P;i++){
+                if(min>etaPerPlayer[i]){
+                    min=etaPerPlayer[i];
+                }
+            }
+            return min;
         }
         
         public void plan(){
@@ -195,6 +212,13 @@ public class L3_FirstBot {
             for(Zone zr : context.zones){
                 if(zr.owner==context.ID) mine.add(zr);
                 else if(zr.owner==-1) ene.add(zr);
+                
+                if(etaForMenaceLevel(zr, (int)context.avg_dronePerLegitimateZone+1)>10){
+                    for(Drone m : context.freeDrone){
+                        context._orders[ m.id].setLocation(zr.cord);
+                    }
+                    break;
+                }
             }
             
         }
@@ -280,9 +304,10 @@ public class L3_FirstBot {
         }
         
         private void markFreeDrone(){
-            for(Drone d : freeDrone){
-                _orders[d.id].setLocation(new Point(0,0));
-            }
+            //for(Drone d : freeDrone){
+             //   _orders[d.id].setLocation(new Point(0,0));
+            //}
+            AttackDefPlanner adp=AttackDefPlanner.inst(this).
         }
 
         @Override
