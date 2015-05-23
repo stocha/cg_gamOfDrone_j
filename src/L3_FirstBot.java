@@ -41,7 +41,8 @@ public class L3_FirstBot {
             created,
             success,
             running,
-            canceled
+            canceled,
+            suspended,
         }  
         public static enum AbortReason{
             takenByEnemy,
@@ -83,6 +84,20 @@ public class L3_FirstBot {
             return "Mission{" + "type=" + type + ", turnCreation=" + turnCreation + ", turnExpectedEnd=" + turnExpectedEnd + ", turnCanceled=" + turnCanceled + ", status=" + status + ", assignedResource=" + assignedResource + ", distanceSqToFirstDrone=" + distanceSqToFirstDrone + '}';
         }
         
+        public boolean enCours(){
+            if( missionTarget.owner!=context.ID){
+                boolean allThere=true;
+                for(Drone d : assignedResource){
+                    if (missionTarget.coucheLevel(d)>0){
+                        allThere&=false;
+                    }
+                }
+                return !allThere;            
+            }
+            
+            return false;
+        }
+        
         
         public void applyResourcesOrders(Point[] ordersOut){
             for(Drone d : this.assignedResource){
@@ -110,6 +125,25 @@ public class L3_FirstBot {
 
         public Bot(InputStream inst) {
             super(inst);
+        }
+        
+        private void decomissionMissionInitConquest(){
+            
+            missionTransfert.clear();
+            droneTransfert.clear();
+            for(Mission mi : missionActives){
+                if(!mi.enCours()){
+                    missionTransfert.add(mi);
+                }                
+            }
+            for(Mission mi : missionTransfert){
+                freeDrone.addAll(mi.assignedResource);
+                mi.assignedResource.clear();
+            }            
+            
+            missionActives.removeAll(missionTransfert);
+            missionTransfert.clear();
+            
         }
         
         private void examineAndPlanMissionInitConquestProposed(){
@@ -154,6 +188,12 @@ public class L3_FirstBot {
            }            
             
         }
+        
+        private void markFreeDrone(){
+            for(Drone d : freeDrone){
+                _orders[d.id].setLocation(new Point(0,0));
+            }
+        }
 
         @Override
         void doPrepareOrder() {
@@ -170,6 +210,10 @@ public class L3_FirstBot {
                         missionInitConquestProposed.add(conq);
                     }
                 }                
+            }else{
+                decomissionMissionInitConquest();
+                markFreeDrone();
+            
             }
 
             

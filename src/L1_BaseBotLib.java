@@ -1,4 +1,5 @@
 
+import com.sun.prism.image.Coords;
 import java.awt.Point;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -28,6 +29,9 @@ public class L1_BaseBotLib {
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
     static final int supposedMaxTurn=700;
+    
+    static final int lvl0Dist=100;
+    static final int maxSpeed=100;
 
     interface Factory<E> {
 
@@ -91,7 +95,10 @@ public class L1_BaseBotLib {
             return "ZoneBase{" + "id=" + id + ", owner=" + owner + ", turnowned=" + turnowned + '}';
         }
         
-        
+        public int coucheLevel(L0_GraphicLib2d.WithCoord cc){
+            double dd = this.cord.distance(cc.cord());
+            return (int)dd/lvl0Dist;
+        }
 
     }
 
