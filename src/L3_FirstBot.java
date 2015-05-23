@@ -307,7 +307,9 @@ public class L3_FirstBot {
             //for(Drone d : freeDrone){
              //   _orders[d.id].setLocation(new Point(0,0));
             //}
-            AttackDefPlanner adp=AttackDefPlanner.inst(this).
+            AttackDefPlanner adp=AttackDefPlanner.inst(this);
+            adp.calcNamedMenaces();
+            adp.plan();
         }
 
         @Override
