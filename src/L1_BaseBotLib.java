@@ -100,6 +100,33 @@ public class L1_BaseBotLib {
             double dd = this.cord.distance(cc.cord());
             return (int)dd/lvl0Dist;
         }
+        
+        public int headingSpeed(DroneBase cc){
+            Point vecpos=new Point(cord.x-cc.cord.x,cord.y-cc.cord.y);
+            Point vitMob=new Point(0,0);
+            if(!cc.speeds.isEmpty()){
+                vitMob.setLocation(cc.speeds.getFirst().cord);
+            }
+            double norm=vecpos.x*vecpos.x+vecpos.y*vecpos.y;
+            norm=Math.sqrt(norm);
+                    
+            double res=vecpos.x*vitMob.x+vecpos.y*vitMob.y;
+            if(norm==0) res=0; else res=res/norm;
+            return (int)res;
+        
+        }
+        
+        public int headingLevel(DroneBase cc){
+            int res=headingSpeed(cc);
+            
+           Point vecpos=new Point(cord.x-cc.cord.x,cord.y-cc.cord.y);
+           double norm=vecpos.x*vecpos.x+vecpos.y*vecpos.y;
+           norm=Math.sqrt(norm);
+            
+            if(res<=0) return res;
+            return (int)norm/res;
+        
+        }
 
     }
 
