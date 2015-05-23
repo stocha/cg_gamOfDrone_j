@@ -21,7 +21,7 @@ public class L3_FirstBot {
     
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
-    static final boolean debug_transfertList=true;
+    static final boolean debug_transfertList=false;
     
     public static class Drone extends L1_BaseBotLib.DroneBase implements L0_GraphicLib2d.WithCoord{
         List<Mission> mission=new ArrayList<>(expectedMissionMax);
@@ -59,19 +59,23 @@ public class L3_FirstBot {
         List<Drone> assignedResource=new ArrayList<>(L1_BaseBotLib.maxDrones);
         
         Zone missionTarget=null;
+        Bot context=null;
         
         public double distanceSqToFirstDrone;
         Drone closestFreeDrone=null;
         
         public void createConquestInit(Zone target,Bot context){
+            this.context=context;
             missionTarget=target;
             turnCreation=context._turn_Number;
             status=MissionStatus.created;
             type=MissionType.conquestInit;
-
-            Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)target, context.freeDrone);
+        }
+        
+        public void findNextClosest(){
+            Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)missionTarget, context.freeDrone);
             distanceSqToFirstDrone=missionTarget.cord.distanceSq(close.cord);
-            closestFreeDrone=close;
+            closestFreeDrone=close;            
         }
 
         @Override
@@ -111,24 +115,36 @@ public class L3_FirstBot {
         private void examineAndPlanMissionInitConquestProposed(){
             if(missionInitConquestProposed.isEmpty()) return;
             
-           final Comparator<Mission> distance;
-           distance = (e1, e2) -> (int)(e1.distanceSqToFirstDrone-e2.distanceSqToFirstDrone);
-           Collections.sort( missionInitConquestProposed,distance );
-           
-           
-           for(Mission mi : missionInitConquestProposed){
-               if(droneTransfert.contains(mi.closestFreeDrone)) continue;
-               droneTransfert.add(mi.closestFreeDrone);
-               missionTransfert.add(mi);
-               mi.assignedResource.add(mi.closestFreeDrone);
+            
+           while(!freeDrone.isEmpty()){
+               
+                for(Mission m : missionInitConquestProposed){
+                    m.findNextClosest();
+
+                }
+
+                final Comparator<Mission> distance;
+                distance = (e1, e2) -> (int)(e1.distanceSqToFirstDrone-e2.distanceSqToFirstDrone);
+                Collections.sort( missionInitConquestProposed,distance );
+
+
+                for(Mission mi : missionInitConquestProposed){
+                    if(droneTransfert.contains(mi.closestFreeDrone)) continue;
+                    droneTransfert.add(mi.closestFreeDrone);
+                    mi.assignedResource.add(mi.closestFreeDrone);
+                }
+
+                freeDrone.removeAll(droneTransfert);
+                droneTransfert.clear();
            }
-           
-           missionInitConquestProposed.removeAll(missionTransfert);
-           missionActives.addAll(missionTransfert);
-           missionTransfert.clear();
-           
-           freeDrone.removeAll(droneTransfert);
-           droneTransfert.clear();
+                for(Mission mi : missionInitConquestProposed){
+                    if(!mi.assignedResource.isEmpty())
+                        missionTransfert.add(mi);
+                }           
+
+                missionInitConquestProposed.clear();
+                missionActives.addAll(missionTransfert);
+                missionTransfert.clear();           
             
         }
         
