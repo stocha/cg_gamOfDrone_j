@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,11 +16,11 @@ import java.util.Scanner;
  *
  * @author Jahan
  */
-public class PlayerLib {
+public class BaseBotLib {
     
     private static boolean debug_base=true;
     private static boolean debug_players=false;    
-    private static boolean debug_drones=true;
+    private static boolean debug_drones=false;
     private static boolean debug_zones=false;
 
     static final int supposedMaxZone = 20;
@@ -58,10 +57,10 @@ public class PlayerLib {
         
     }
 
-    public abstract static class DroneBase extends Player.PlayerLib.GamePos {
+    public abstract static class DroneBase extends GamePos {
 
-        final ArrayDeque<PlayerLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
-        final ArrayDeque<PlayerLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<BaseBotLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<BaseBotLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
 
         int id;
 
@@ -74,7 +73,7 @@ public class PlayerLib {
 
     }
 
-    public abstract static class ZoneBase extends Player.PlayerLib.GamePos {
+    public abstract static class ZoneBase extends GamePos {
 
         int id;
         int owner;
@@ -267,10 +266,10 @@ public class PlayerLib {
                 for (int d = 0; d < D; d++) {
                     Dt it=playerDrones.get(p).get(d);
                     it.cord.setLocation(_playerDronesCords[p][d]);
-                    PlayerLib.GamePos cc=new PlayerLib.GamePos();
+                    BaseBotLib.GamePos cc=new BaseBotLib.GamePos();
                     cc.set(_playerDronesCords[p][d]);
 
-                    PlayerLib.GamePos vc=new PlayerLib.GamePos();
+                    BaseBotLib.GamePos vc=new BaseBotLib.GamePos();
                     
                     if(!it.coords.isEmpty()){
                         GraphicLib2d.WithCoord prev=it.coords.getFirst();

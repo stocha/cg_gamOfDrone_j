@@ -13,7 +13,7 @@ import java.io.InputStream;
  */
 public class BarePlayerImpl {
 
-    public static class Bot extends PlayerLib.BotBase<PlayerLib.DroneBase,PlayerLib.ZoneBase,PlayerLib.PlayerBase>{
+    public static class Bot extends BaseBotLib.BotBase<BaseBotLib.DroneBase,BaseBotLib.ZoneBase,BaseBotLib.PlayerBase>{
 
         public Bot(InputStream inst) {
             super(inst);
@@ -25,23 +25,23 @@ public class BarePlayerImpl {
         }
 
         @Override
-        PlayerLib.DroneBase newdrone() {
-            return new PlayerLib.DroneBase(){};
+        BaseBotLib.DroneBase newdrone() {
+            return new BaseBotLib.DroneBase(){};
         }
 
         @Override
-        PlayerLib.ZoneBase newzone() {
-            return new PlayerLib.ZoneBase(){};
+        BaseBotLib.ZoneBase newzone() {
+            return new BaseBotLib.ZoneBase(){};
         }
 
         @Override
-        PlayerLib.PlayerBase newplayer() {
-            return new PlayerLib.PlayerBase(){};
+        BaseBotLib.PlayerBase newplayer() {
+            return new BaseBotLib.PlayerBase(){};
         }
     }
     
     public static void main(String[] args) {
-        PlayerLib.BotBase theBot=new Bot(System.in);
+        BaseBotLib.BotBase theBot=new Bot(System.in);
         
         double maxT=0;
 

@@ -34,7 +34,7 @@ public class GraphicLib2d {
         return max;
     }
     
-    public static < T extends WithCoord> T closestFrom(WithCoord cc,List<T> them){
+    public static < T extends WithCoord> T closestFrom(WithCoord cc,List<T > them){
         double minDist=Double.MAX_VALUE;
         T min=null;
         for(T w : them){
