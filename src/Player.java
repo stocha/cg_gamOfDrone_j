@@ -137,7 +137,7 @@ class Player {
 }
 
 
-   public static class L1_BaseBotLib {
+public static class L1_BaseBotLib {
     
     private static boolean debug_base=true;
     private static boolean debug_players=false;    
@@ -189,6 +189,7 @@ class Player {
         final ArrayDeque<L1_BaseBotLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
 
         int id;
+        int owner;
 
         @Override
         public String toString() {
@@ -218,6 +219,34 @@ class Player {
         public int coucheLevel(L0_GraphicLib2d.WithCoord cc){
             double dd = this.cord.distance(cc.cord());
             return (int)dd/lvl0Dist;
+        }
+        
+        public int headingSpeed(DroneBase cc){
+            Point vecpos=new Point(cord.x-cc.cord.x,cord.y-cc.cord.y);
+            Point vitMob=new Point(0,0);
+            if(!cc.speeds.isEmpty()){
+                vitMob.setLocation(cc.speeds.getFirst().cord);
+            }
+            double norm=vecpos.x*vecpos.x+vecpos.y*vecpos.y;
+            norm=Math.sqrt(norm);
+                    
+            double res=vecpos.x*vitMob.x+vecpos.y*vitMob.y;
+            if(norm==0) res=0; else res=res/norm;
+            return (int)res;
+        
+        }
+        
+        public int headingLevel(DroneBase cc){
+            int res=headingSpeed(cc);
+            
+           Point vecpos=new Point(cord.x-cc.cord.x,cord.y-cc.cord.y);
+           double norm=vecpos.x*vecpos.x+vecpos.y*vecpos.y;
+           norm=Math.sqrt(norm);
+            
+           if(res==0) return 40;
+            if(res<0) return 80;
+            return (int)norm/res;
+        
         }
 
     }
@@ -336,6 +365,7 @@ class Player {
                 for (int d = 0; d < D; d++) {
                     Dt n = newdrone();
                     n.id = d;
+                    n.owner=p;
                     playerDrones.get(p).add(n);
                 }
             }
@@ -452,11 +482,11 @@ class Player {
     }
 }
 
-   
-   
 
-
-public  static class L3_FirstBot {
+   
+   public static class L3_FirstBot {
+    
+    static final boolean debugPlanner=true;
     
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
@@ -549,6 +579,129 @@ public  static class L3_FirstBot {
         
     }
     
+    public static class AttackDefPlanner{
+        final static int maxEtaCalc=60;
+        
+        final Bot context;
+        private final List<List<Drone>> sectorMenac;
+        private final List<List<Integer>> etamenace;
+        private final List<Drone> sectorRessource;
+        private final List<Integer> etaressourceEta;
+        
+        private static AttackDefPlanner inst=null;
+        private static AttackDefPlanner inst(Bot con){
+            if(inst==null){
+                inst=new AttackDefPlanner(con);
+            }
+            return inst;
+        }
+
+        public AttackDefPlanner(Bot context) {
+            this.context = context;
+            
+            sectorMenac=new ArrayList<>(context.Z);
+            etamenace=new ArrayList<>(context.Z);
+            for(int z=0;z<context.Z;z++){
+                sectorMenac.add(new ArrayList<>(context.D));
+                etamenace.add(new ArrayList<>(context.D));
+            }
+            sectorRessource=new ArrayList<>(context.D);
+            etaressourceEta=new ArrayList<>(context.D);
+        }
+        
+        public void calcNamedMenaces(){
+            
+            // Clear
+            for(int i=0;i<sectorMenac.size();i++){
+                sectorMenac.get(i).clear();
+                etamenace.get(i).clear();
+            }
+           sectorRessource.clear();
+           etaressourceEta.clear();
+           
+           // parcours bots et sector           
+           for(int z=0;z<context.Z;z++){
+               Zone zo=context.zones.get(z);
+               
+               for(int p=0;p<context.P;p++){
+                   for(int d=0;d<context.D;d++){
+                       Drone dr =context.playerDrones.get(p).get(d);
+                       
+                       int etapes=zo.coucheLevel(dr);
+                       int etan=zo.headingLevel(dr);
+                       if(etapes <=2) etan=0;
+                       
+                       if(etan <maxEtaCalc){
+                           if(p==context.ID){
+                               sectorRessource.add(dr);
+                               etaressourceEta.add(etapes);
+                           }else{
+                               sectorMenac.get(z).add(dr);
+                               etamenace.get(z).add(etan);
+                           }
+                       }
+                   }
+               
+               }
+               
+           }
+        }// CalcMenace
+        
+        public int etaForMenaceLevel(Zone zr,int lvl){
+            int[][] nbThreatPerEta=new int[context.P][maxEtaCalc];
+            
+            List<Drone> menDr=sectorMenac.get(zr.id);
+            for(int i=0;i<menDr.size();i++){
+                Drone dr=menDr.get(i);
+                nbThreatPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;
+            }
+            
+            int[] etaPerPlayer=new int[context.P];
+            for(int p=0;p<context.P;p++){
+                int count=0;
+                for(int t=0;t<lvl;t++){
+                    count+=nbThreatPerEta[p][t];
+                }
+                etaPerPlayer[p]=count;
+            }
+            
+            int max=-1;
+            for(int i=0;i<context.P;i++){
+                if(debugPlanner)
+                    System.err.println("z "+zr.id +" p"+i+" etaConst "+etaPerPlayer[i]);
+                if(max<etaPerPlayer[i]){
+                    max=etaPerPlayer[i];
+                }
+            }
+            return max;
+        }
+        
+        public void plan(){
+            List<Zone> mine=new ArrayList<>();
+            List<Zone> ene=new ArrayList<>();
+            
+            if(debugPlanner) {System.err.println(""+etamenace);}
+            
+            for(Zone zr : context.zones){                
+                if(zr.owner==context.ID) mine.add(zr);
+                else if(zr.owner==-1) ene.add(zr);
+                
+                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerLegitimateZone+1);
+                
+                if(debugPlanner){
+                    System.err.println("Zone "+zr.id+" eta "+eta);
+                }
+                
+                if(eta>4){
+                    for(Drone m : context.freeDrone){
+                        context._orders[ m.id].setLocation(zr.cord);
+                    }
+                }
+            }
+            
+        }
+    }
+    
 
     public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{      
             
@@ -629,9 +782,12 @@ public  static class L3_FirstBot {
         }
         
         private void markFreeDrone(){
-            for(Drone d : freeDrone){
-                _orders[d.id].setLocation(new Point(0,0));
-            }
+            //for(Drone d : freeDrone){
+             //   _orders[d.id].setLocation(new Point(0,0));
+            //}
+            AttackDefPlanner adp=AttackDefPlanner.inst(this);
+            adp.calcNamedMenaces();
+            adp.plan();
         }
 
         @Override
@@ -691,6 +847,8 @@ public  static class L3_FirstBot {
     }    
     
 }
+
+
 
 
 

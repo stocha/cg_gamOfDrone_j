@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class L3_FirstBot {
     
+    static final boolean debugPlanner=true;
+    
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
     static final boolean debug_transfertList=false;
@@ -196,28 +198,37 @@ public class L3_FirstBot {
                 etaPerPlayer[p]=count;
             }
             
-            int min=Integer.MAX_VALUE;
+            int max=-1;
             for(int i=0;i<context.P;i++){
-                if(min>etaPerPlayer[i]){
-                    min=etaPerPlayer[i];
+                if(debugPlanner)
+                    System.err.println("z "+zr.id +" p"+i+" etaConst "+etaPerPlayer[i]);
+                if(max<etaPerPlayer[i]){
+                    max=etaPerPlayer[i];
                 }
             }
-            return min;
+            return max;
         }
         
         public void plan(){
             List<Zone> mine=new ArrayList<>();
             List<Zone> ene=new ArrayList<>();
             
-            for(Zone zr : context.zones){
+            if(debugPlanner) {System.err.println(""+etamenace);}
+            
+            for(Zone zr : context.zones){                
                 if(zr.owner==context.ID) mine.add(zr);
                 else if(zr.owner==-1) ene.add(zr);
                 
-                if(etaForMenaceLevel(zr, (int)context.avg_dronePerLegitimateZone+1)>10){
+                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerLegitimateZone+1);
+                
+                if(debugPlanner){
+                    System.err.println("Zone "+zr.id+" eta "+eta);
+                }
+                
+                if(eta>4){
                     for(Drone m : context.freeDrone){
                         context._orders[ m.id].setLocation(zr.cord);
                     }
-                    break;
                 }
             }
             
