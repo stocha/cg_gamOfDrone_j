@@ -17,6 +17,7 @@ import java.util.List;
  * @author Jahan
  */
 public class L3_FirstBot {
+    
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
     static final boolean debug_transfertList=true;

@@ -485,6 +485,7 @@ public static class L3_FirstBot {
             type=MissionType.conquestInit;
 
             Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)target, context.freeDrone);
+            if(close==null) return;
             distanceSqToFirstDrone=missionTarget.cord.distanceSq(close.cord);
         }
 
@@ -576,4 +577,51 @@ public static class L3_FirstBot {
 
     
     
+    public static class Bot extends L1_BaseBotLib.BotBase<L1_BaseBotLib.DroneBase,L1_BaseBotLib.ZoneBase,L1_BaseBotLib.PlayerBase>{
+
+        public Bot(InputStream inst) {
+            super(inst);
+        }
+
+        @Override
+        void doPrepareOrder() {
+            
+        }
+
+        @Override
+        L1_BaseBotLib.DroneBase newdrone() {
+            return new L1_BaseBotLib.DroneBase(){};
+        }
+
+        @Override
+        L1_BaseBotLib.ZoneBase newzone() {
+            return new L1_BaseBotLib.ZoneBase(){};
+        }
+
+        @Override
+        L1_BaseBotLib.PlayerBase newplayer() {
+            return new L1_BaseBotLib.PlayerBase(){};
+        }
+    }
+    
+    public static void main(String[] args) {
+        L1_BaseBotLib.BotBase theBot=new L3_FirstBot.Bot(System.in);
+        
+        double maxT=0;
+
+        while (true) {
+            long t0 = System.currentTimeMillis();
+            theBot.readTurn();
+            theBot.doPrepareOrder();
+            theBot.writeOrders(System.out);
+
+            long t1 = System.currentTimeMillis();
+            double t = t1 - t0;
+            if(maxT <t) maxT=t;
+            System.err.println("------------------------------");
+            System.err.println("temps mili " + t+" maxT "+maxT);
+            System.gc();
+        }
+
+    }        
 }

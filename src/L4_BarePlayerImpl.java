@@ -41,7 +41,7 @@ public class L4_BarePlayerImpl {
     }
     
     public static void main(String[] args) {
-        L1_BaseBotLib.BotBase theBot=new Bot(System.in);
+        L1_BaseBotLib.BotBase theBot=new L3_FirstBot.Bot(System.in);
         
         double maxT=0;
 
