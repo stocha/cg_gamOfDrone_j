@@ -434,6 +434,7 @@ class Player {
 }
 
 public static class L3_FirstBot {
+    
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
     static final boolean debug_transfertList=true;
@@ -485,7 +486,6 @@ public static class L3_FirstBot {
             type=MissionType.conquestInit;
 
             Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)target, context.freeDrone);
-            if(close==null) return;
             distanceSqToFirstDrone=missionTarget.cord.distanceSq(close.cord);
         }
 
@@ -499,7 +499,11 @@ public static class L3_FirstBot {
     }
     
 
-    public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{        
+    public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{      
+            
+    boolean doneInitConquest=false;
+        
+        
         ArrayDeque<Mission> missionActives=new ArrayDeque<>(expectedMissionMax);
         ArrayDeque<Mission> missionCancelled=new ArrayDeque<>(expectedMissionMax);
         List<Mission> missionInitConquestProposed=new ArrayList<>(expectedMissionMax);
@@ -534,13 +538,19 @@ public static class L3_FirstBot {
 
         @Override
         void doPrepareOrder() {
-            for(Zone z : zones){
-                if(z.owner==-1){
-                    Mission conq=new Mission();
-                    conq.createConquestInit(z, this);
-                    missionInitConquestProposed.add(conq);
-                }
+            
+            if(!this.doneInitConquest){
+                doneInitConquest=true;
+                for(Zone z : zones){
+                    if(z.owner==-1){
+                        Mission conq=new Mission();
+                        System.err.println("Creating mission for "+z);
+                        conq.createConquestInit(z, this);
+                        missionInitConquestProposed.add(conq);
+                    }
+                }                
             }
+
             
             examineAndPlanMissionInitConquestProposed();
             
@@ -574,6 +584,7 @@ public static class L3_FirstBot {
     }    
     
 }
+
 
     
     

@@ -63,13 +63,14 @@ public class L3_FirstBot {
         Drone closestFreeDrone=null;
         
         public void createConquestInit(Zone target,Bot context){
-            this.missionTarget=target;
+            missionTarget=target;
             turnCreation=context._turn_Number;
             status=MissionStatus.created;
             type=MissionType.conquestInit;
 
             Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)target, context.freeDrone);
             distanceSqToFirstDrone=missionTarget.cord.distanceSq(close.cord);
+            closestFreeDrone=close;
         }
 
         @Override
@@ -82,7 +83,11 @@ public class L3_FirstBot {
     }
     
 
-    public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{        
+    public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{      
+            
+    boolean doneInitConquest=false;
+        
+        
         ArrayDeque<Mission> missionActives=new ArrayDeque<>(expectedMissionMax);
         ArrayDeque<Mission> missionCancelled=new ArrayDeque<>(expectedMissionMax);
         List<Mission> missionInitConquestProposed=new ArrayList<>(expectedMissionMax);
@@ -117,13 +122,21 @@ public class L3_FirstBot {
 
         @Override
         void doPrepareOrder() {
-            for(Zone z : zones){
-                if(z.owner==-1){
-                    Mission conq=new Mission();
-                    conq.createConquestInit(z, this);
-                    missionInitConquestProposed.add(conq);
-                }
+            
+            if(!this.doneInitConquest){
+                freeDrone.addAll(this.playerDrones.get(ID));
+                
+                doneInitConquest=true;
+                for(Zone z : zones){
+                    if(z.owner==-1){
+                        Mission conq=new Mission();
+                        System.err.println("Creating mission for "+z);
+                        conq.createConquestInit(z, this);
+                        missionInitConquestProposed.add(conq);
+                    }
+                }                
             }
+
             
             examineAndPlanMissionInitConquestProposed();
             
@@ -134,6 +147,7 @@ public class L3_FirstBot {
                 System.err.println("missionActives"+missionInitConquestProposed);
                 System.err.println("missionTransfert"+missionTransfert);
                 System.err.println("droneTransfert"+droneTransfert);
+                System.err.println("freeDrone"+freeDrone);
             
             }
             
