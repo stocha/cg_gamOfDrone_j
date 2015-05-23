@@ -136,12 +136,14 @@ class Player {
     
 }
 
-    public static class L1_BaseBotLib {
+public static class L1_BaseBotLib {
     
     private static boolean debug_base=true;
     private static boolean debug_players=false;    
     private static boolean debug_drones=false;
     private static boolean debug_zones=false;
+    
+    private static boolean debug_droneHistory=false;
 
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
@@ -186,7 +188,12 @@ class Player {
 
         @Override
         public String toString() {
-            return "DroneBase{" + "coords=" + coords + ", speeds=" + speeds + ", id=" + id + '}' ;
+            String res="";
+            res+="id=" + id + '}' + coords.getFirst()+" "+speeds.getFirst();
+            if(debug_droneHistory)
+                res+= "DroneBase{" + "coords=" + coords + ", speeds=" + speeds + ", id=" + id + '}' ;
+            
+            return res;
         }
         
         
@@ -480,13 +487,14 @@ public static class L3_FirstBot {
         Drone closestFreeDrone=null;
         
         public void createConquestInit(Zone target,Bot context){
-            this.missionTarget=target;
+            missionTarget=target;
             turnCreation=context._turn_Number;
             status=MissionStatus.created;
             type=MissionType.conquestInit;
 
             Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)target, context.freeDrone);
             distanceSqToFirstDrone=missionTarget.cord.distanceSq(close.cord);
+            closestFreeDrone=close;
         }
 
         @Override
@@ -540,6 +548,8 @@ public static class L3_FirstBot {
         void doPrepareOrder() {
             
             if(!this.doneInitConquest){
+                freeDrone.addAll(this.playerDrones.get(ID));
+                
                 doneInitConquest=true;
                 for(Zone z : zones){
                     if(z.owner==-1){
@@ -561,6 +571,7 @@ public static class L3_FirstBot {
                 System.err.println("missionActives"+missionInitConquestProposed);
                 System.err.println("missionTransfert"+missionTransfert);
                 System.err.println("droneTransfert"+droneTransfert);
+                System.err.println("freeDrone"+freeDrone);
             
             }
             
@@ -584,6 +595,7 @@ public static class L3_FirstBot {
     }    
     
 }
+
 
 
     

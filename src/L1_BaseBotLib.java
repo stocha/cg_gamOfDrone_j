@@ -22,6 +22,8 @@ public class L1_BaseBotLib {
     private static boolean debug_players=false;    
     private static boolean debug_drones=false;
     private static boolean debug_zones=false;
+    
+    private static boolean debug_droneHistory=false;
 
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
@@ -66,7 +68,12 @@ public class L1_BaseBotLib {
 
         @Override
         public String toString() {
-            return "DroneBase{" + "coords=" + coords + ", speeds=" + speeds + ", id=" + id + '}' ;
+            String res="";
+            res+="id=" + id + '}' + coords.getFirst()+" "+speeds.getFirst();
+            if(debug_droneHistory)
+                res+= "DroneBase{" + "coords=" + coords + ", speeds=" + speeds + ", id=" + id + '}' ;
+            
+            return res;
         }
         
         
@@ -96,7 +103,12 @@ public class L1_BaseBotLib {
 
         @Override
         public String toString() {
-            return "PlayerBase{" + "id=" + id + ", nbControlled=" + nbControlled + ", controlHistorique=" + controlHistorique + '}';
+            String res=" "+ "id=" + id + ", nbControlled=" + nbControlled;
+            
+            if(debug_droneHistory)
+                res+="PlayerBase{" + "id=" + id + ", nbControlled=" + nbControlled + ", controlHistorique=" + controlHistorique + '}';
+            
+            return res;
         }
         
         
