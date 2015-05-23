@@ -485,6 +485,11 @@ public static class L1_BaseBotLib {
 }
 
 
+
+/**
+ *
+ * @author Jahan
+ */
 public static class L3_FirstBot {
     
     static final boolean debugPlanner=false;
@@ -610,7 +615,8 @@ public static class L3_FirstBot {
                 for(int i=0;i<souhai-assignedResource.size();i++){
                     if(context.freeDrone.isEmpty()) break;
                     
-                    assignedResource.add(context.freeDrone.get(0));
+                    Drone close=L0_GraphicLib2d.closestFrom(missionTarget, context.freeDrone);
+                    assignedResource.add(close);
                     context.freeDrone.removeAll(assignedResource);
                 }
                 
@@ -755,13 +761,13 @@ public static class L3_FirstBot {
                 if(zr.owner==context.ID) mine.add(zr);
                 else if(zr.owner==-1) ene.add(zr);
                 
-                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerLegitimateZone+1);
+                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerZone);
                 
                 if(debugPlanner){
-                    System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone+1));
+                    System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone));
                 }
                 
-                if(eta>5 && mission.size() < context.Z){
+                if(eta>5 && mission.size() < context.Z && zr.owner!=context.ID){
                     mission.add(new MissionAttack(zr));
                 }
             }
@@ -924,6 +930,8 @@ public static class L3_FirstBot {
     }    
     
 }
+
+
 
 
 
