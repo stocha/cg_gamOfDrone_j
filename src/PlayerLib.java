@@ -41,7 +41,7 @@ public class PlayerLib {
         }
     }
 
-    public abstract static class DroneBase<Zt extends ZoneBase> extends GamePos {
+    public abstract static class DroneBase extends GamePos {
 
         final ArrayDeque<GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
         final ArrayDeque<GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
