@@ -14,7 +14,7 @@ import java.util.Comparator;
  *
  * @author denis
  */
-public class GraphicLib2d {
+public class L0_GraphicLib2d {
     
     public interface WithCoord{
         Point cord();

@@ -46,7 +46,7 @@ public class GraphicLib2dTests {
     // @Test
     // public void hello() {}
     
-    public static class P implements GraphicLib2d.WithCoord{
+    public static class P implements L0_GraphicLib2d.WithCoord{
         final Point p=new Point(0,0);
         
         public P(){
@@ -79,15 +79,15 @@ public class GraphicLib2dTests {
         
         P zer=new P(0,0);
         
-        Assert.assertEquals("Farthest java.awt.Point[x=2,y=0]","Farthest "+GraphicLib2d.farthestFrom(zer, tos));
-        Assert.assertEquals("Clothest java.awt.Point[x=-1,y=0]","Clothest "+GraphicLib2d.closestFrom(zer, tos));
+        Assert.assertEquals("Farthest java.awt.Point[x=2,y=0]","Farthest "+L0_GraphicLib2d.farthestFrom(zer, tos));
+        Assert.assertEquals("Clothest java.awt.Point[x=-1,y=0]","Clothest "+L0_GraphicLib2d.closestFrom(zer, tos));
         
-        Assert.assertEquals("Farthest sort [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=0]]","Farthest sort "+GraphicLib2d.sortFarthestFrom(zer, tos));
-        Assert.assertEquals("Clothest sort [java.awt.Point[x=-1,y=0], java.awt.Point[x=2,y=0]]","Clothest sort "+GraphicLib2d.sortClothestFrom(zer, tos));   
+        Assert.assertEquals("Farthest sort [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=0]]","Farthest sort "+L0_GraphicLib2d.sortFarthestFrom(zer, tos));
+        Assert.assertEquals("Clothest sort [java.awt.Point[x=-1,y=0], java.awt.Point[x=2,y=0]]","Clothest sort "+L0_GraphicLib2d.sortClothestFrom(zer, tos));   
         
         tos.add(new P(-1,1));
-        Assert.assertEquals("Closest elem [java.awt.Point[x=-1,y=0], java.awt.Point[x=-1,y=1]]","Closest elem "+GraphicLib2d.clothestElements( tos));
-        Assert.assertEquals("Farthest elem [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=1]]","Farthest elem "+GraphicLib2d.farthestElements(tos));
+        Assert.assertEquals("Closest elem [java.awt.Point[x=-1,y=0], java.awt.Point[x=-1,y=1]]","Closest elem "+L0_GraphicLib2d.clothestElements( tos));
+        Assert.assertEquals("Farthest elem [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=1]]","Farthest elem "+L0_GraphicLib2d.farthestElements(tos));
         
         //System.out.println();
         
@@ -103,25 +103,25 @@ public class GraphicLib2dTests {
         
         
         
-        Assert.assertEquals("java.awt.Point[x=2,y=1]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
-        Assert.assertEquals("java.awt.Point[x=4,y=1]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 3));
+        Assert.assertEquals("java.awt.Point[x=2,y=1]",""+L0_GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        Assert.assertEquals("java.awt.Point[x=4,y=1]",""+L0_GraphicLib2d.SegABatDistFromA(zer, dir, 3));
         
         dir.cord().setLocation(-99,-99);
-        Assert.assertEquals("java.awt.Point[x=0,y=0]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
-        Assert.assertEquals("java.awt.Point[x=-20,y=-20]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 30));        
+        Assert.assertEquals("java.awt.Point[x=0,y=0]",""+L0_GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        Assert.assertEquals("java.awt.Point[x=-20,y=-20]",""+L0_GraphicLib2d.SegABatDistFromA(zer, dir, 30));        
         
         zer.cord().setLocation(0,0);
         dir.cord().setLocation(1,1);
-        Assert.assertEquals("java.awt.Point[x=1,y=1]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
-        Assert.assertEquals("java.awt.Point[x=71,y=71]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 100));         
+        Assert.assertEquals("java.awt.Point[x=1,y=1]",""+L0_GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        Assert.assertEquals("java.awt.Point[x=71,y=71]",""+L0_GraphicLib2d.SegABatDistFromA(zer, dir, 100));         
         
         //System.out.println();
         
         List<P> l= Arrays.asList(new P(-30,-10), new P(30,-10),new P(0,10));
-        Assert.assertEquals("java.awt.Point[x=0,y=-3]",""+GraphicLib2d.baryCenter(l));
+        Assert.assertEquals("java.awt.Point[x=0,y=-3]",""+L0_GraphicLib2d.baryCenter(l));
         
         List<P> l2= Arrays.asList(new P(0,0), new P(0,100),new P(0,100));
-        Assert.assertEquals("java.awt.Point[x=0,y=66]",""+GraphicLib2d.baryCenter(l2));
+        Assert.assertEquals("java.awt.Point[x=0,y=66]",""+L0_GraphicLib2d.baryCenter(l2));
     
     }    
 }

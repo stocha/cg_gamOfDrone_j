@@ -16,22 +16,22 @@ import java.util.List;
  *
  * @author Jahan
  */
-public class FirstBot {
-    static final int expectedMissionMax=BaseBotLib.supposedMaxTurn*BaseBotLib.supposedMaxZone;
+public class L3_FirstBot {
+    static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
     static final boolean debug_transfertList=true;
     
-    public static class Drone extends BaseBotLib.DroneBase implements GraphicLib2d.WithCoord{
+    public static class Drone extends L1_BaseBotLib.DroneBase implements L0_GraphicLib2d.WithCoord{
         List<Mission> mission=new ArrayList<>(expectedMissionMax);
     }
     
-    public static class Zone extends BaseBotLib.ZoneBase{
+    public static class Zone extends L1_BaseBotLib.ZoneBase{
     }    
     
-    public static class Player extends BaseBotLib.PlayerBase{
+    public static class PlayerAnalysis extends L1_BaseBotLib.PlayerBase{
     }        
     
-    public static class Mission extends BaseBotLib.GamePos{
+    public static class Mission extends L1_BaseBotLib.GamePos{
         public static enum MissionType{
             conquestInit,
         }
@@ -54,7 +54,7 @@ public class FirstBot {
         int exepectedReward=-1;
         MissionStatus status=null;
         
-        List<Drone> assignedResource=new ArrayList<>(BaseBotLib.maxDrones);
+        List<Drone> assignedResource=new ArrayList<>(L1_BaseBotLib.maxDrones);
         
         Zone missionTarget=null;
         
@@ -67,7 +67,7 @@ public class FirstBot {
             status=MissionStatus.created;
             type=MissionType.conquestInit;
 
-            Drone close=GraphicLib2d.closestFrom((GraphicLib2d.WithCoord)target, context.freeDrone);
+            Drone close=L0_GraphicLib2d.closestFrom((L0_GraphicLib2d.WithCoord)target, context.freeDrone);
             distanceSqToFirstDrone=missionTarget.cord.distanceSq(close.cord);
         }
 
@@ -81,13 +81,13 @@ public class FirstBot {
     }
     
 
-    public static class Bot extends BaseBotLib.BotBase<Drone,Zone,Player>{        
+    public static class Bot extends L1_BaseBotLib.BotBase<Drone,Zone,PlayerAnalysis>{        
         ArrayDeque<Mission> missionActives=new ArrayDeque<>(expectedMissionMax);
         ArrayDeque<Mission> missionCancelled=new ArrayDeque<>(expectedMissionMax);
         List<Mission> missionInitConquestProposed=new ArrayList<>(expectedMissionMax);
         List<Mission> missionTransfert=new ArrayList<>(expectedMissionMax);
-        List<Drone> freeDrone=new ArrayList<>(BaseBotLib.maxDrones);
-        List<Drone> droneTransfert=new ArrayList<>(BaseBotLib.maxDrones);
+        List<Drone> freeDrone=new ArrayList<>(L1_BaseBotLib.maxDrones);
+        List<Drone> droneTransfert=new ArrayList<>(L1_BaseBotLib.maxDrones);
 
         public Bot(InputStream inst) {
             super(inst);
@@ -150,8 +150,8 @@ public class FirstBot {
         }
 
         @Override
-        Player newplayer() {
-            return new Player(){};
+        PlayerAnalysis newplayer() {
+            return new PlayerAnalysis(){};
         }
     }    
     

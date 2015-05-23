@@ -16,7 +16,7 @@ import java.util.Scanner;
  *
  * @author Jahan
  */
-public class BaseBotLib {
+public class L1_BaseBotLib {
     
     private static boolean debug_base=true;
     private static boolean debug_players=false;    
@@ -32,7 +32,7 @@ public class BaseBotLib {
         E create();
     }
 
-    public static class GamePos implements GraphicLib2d.WithCoord {
+    public static class GamePos implements L0_GraphicLib2d.WithCoord {
 
         final Point cord = new Point(0, 0);
 
@@ -59,8 +59,8 @@ public class BaseBotLib {
 
     public abstract static class DroneBase extends GamePos {
 
-        final ArrayDeque<BaseBotLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
-        final ArrayDeque<BaseBotLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<L1_BaseBotLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<L1_BaseBotLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
 
         int id;
 
@@ -266,13 +266,13 @@ public class BaseBotLib {
                 for (int d = 0; d < D; d++) {
                     Dt it=playerDrones.get(p).get(d);
                     it.cord.setLocation(_playerDronesCords[p][d]);
-                    BaseBotLib.GamePos cc=new BaseBotLib.GamePos();
+                    L1_BaseBotLib.GamePos cc=new L1_BaseBotLib.GamePos();
                     cc.set(_playerDronesCords[p][d]);
 
-                    BaseBotLib.GamePos vc=new BaseBotLib.GamePos();
+                    L1_BaseBotLib.GamePos vc=new L1_BaseBotLib.GamePos();
                     
                     if(!it.coords.isEmpty()){
-                        GraphicLib2d.WithCoord prev=it.coords.getFirst();
+                        L0_GraphicLib2d.WithCoord prev=it.coords.getFirst();
                         vc.cord.setLocation(cc.cord.x-prev.cord().x,cc.cord.y-prev.cord().y);
                     }
                     

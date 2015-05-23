@@ -11,9 +11,9 @@ import java.io.InputStream;
  *
  * @author Jahan
  */
-public class BarePlayerImpl {
+public class L4_BarePlayerImpl {
 
-    public static class Bot extends BaseBotLib.BotBase<BaseBotLib.DroneBase,BaseBotLib.ZoneBase,BaseBotLib.PlayerBase>{
+    public static class Bot extends L1_BaseBotLib.BotBase<L1_BaseBotLib.DroneBase,L1_BaseBotLib.ZoneBase,L1_BaseBotLib.PlayerBase>{
 
         public Bot(InputStream inst) {
             super(inst);
@@ -25,23 +25,23 @@ public class BarePlayerImpl {
         }
 
         @Override
-        BaseBotLib.DroneBase newdrone() {
-            return new BaseBotLib.DroneBase(){};
+        L1_BaseBotLib.DroneBase newdrone() {
+            return new L1_BaseBotLib.DroneBase(){};
         }
 
         @Override
-        BaseBotLib.ZoneBase newzone() {
-            return new BaseBotLib.ZoneBase(){};
+        L1_BaseBotLib.ZoneBase newzone() {
+            return new L1_BaseBotLib.ZoneBase(){};
         }
 
         @Override
-        BaseBotLib.PlayerBase newplayer() {
-            return new BaseBotLib.PlayerBase(){};
+        L1_BaseBotLib.PlayerBase newplayer() {
+            return new L1_BaseBotLib.PlayerBase(){};
         }
     }
     
     public static void main(String[] args) {
-        BaseBotLib.BotBase theBot=new Bot(System.in);
+        L1_BaseBotLib.BotBase theBot=new Bot(System.in);
         
         double maxT=0;
 
