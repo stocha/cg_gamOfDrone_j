@@ -556,7 +556,7 @@ public static class L3_FirstBot {
         }
         
         private void applyMissionPlanning(){
-           for(Mission mi : missionInitConquestProposed){
+           for(Mission mi : missionActives){
                mi.applyResourcesOrders(this._orders);
            }            
             
@@ -593,6 +593,8 @@ public static class L3_FirstBot {
             
             }
             
+            applyMissionPlanning();
+            
             
         }
 
@@ -613,6 +615,8 @@ public static class L3_FirstBot {
     }    
     
 }
+
+
 
 
 
