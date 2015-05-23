@@ -484,7 +484,7 @@ public static class L1_BaseBotLib {
 
 
    
-   public static class L3_FirstBot {
+public static class L3_FirstBot {
     
     static final boolean debugPlanner=true;
     
@@ -647,33 +647,35 @@ public static class L1_BaseBotLib {
            }
         }// CalcMenace
         
-        public int etaForMenaceLevel(Zone zr,int lvl){
+        public int etaForMenaceLevel(Zone zr,int nbDroneEnemy){
             int[][] nbThreatPerEta=new int[context.P][maxEtaCalc];
             
             List<Drone> menDr=sectorMenac.get(zr.id);
             for(int i=0;i<menDr.size();i++){
                 Drone dr=menDr.get(i);
-                nbThreatPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;
+                nbThreatPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;             
             }
             
             int[] etaPerPlayer=new int[context.P];
             for(int p=0;p<context.P;p++){
                 int count=0;
-                for(int t=0;t<lvl;t++){
+                for(int t=0;t<maxEtaCalc && count < nbDroneEnemy;t++){
                     count+=nbThreatPerEta[p][t];
+                    etaPerPlayer[p]=t;
                 }
-                etaPerPlayer[p]=count;
+                
             }
             
-            int max=-1;
+            int min=Integer.MAX_VALUE;
             for(int i=0;i<context.P;i++){
+                if(i==context.ID) continue;
                 if(debugPlanner)
                     System.err.println("z "+zr.id +" p"+i+" etaConst "+etaPerPlayer[i]);
-                if(max<etaPerPlayer[i]){
-                    max=etaPerPlayer[i];
+                if(min>etaPerPlayer[i]){
+                    min=etaPerPlayer[i];
                 }
             }
-            return max;
+            return min;
         }
         
         public void plan(){
@@ -689,7 +691,7 @@ public static class L1_BaseBotLib {
                 int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerLegitimateZone+1);
                 
                 if(debugPlanner){
-                    System.err.println("Zone "+zr.id+" eta "+eta);
+                    System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone+1));
                 }
                 
                 if(eta>4){
@@ -847,6 +849,7 @@ public static class L1_BaseBotLib {
     }    
     
 }
+
 
 
 
