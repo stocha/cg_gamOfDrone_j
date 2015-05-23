@@ -135,8 +135,11 @@ public static class GraphicLib2d {
     }     
     
 }    
+
+public static class PlayerLib 
+ {
     
-public static class PlayerLib {
+    private static boolean debug_base=true;
 
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
@@ -161,20 +164,34 @@ public static class PlayerLib {
         }
     }
 
-    public abstract static class DroneBase extends GamePos {
+    public abstract static class DroneBase extends Player.PlayerLib.GamePos {
 
-        final ArrayDeque<GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
-        final ArrayDeque<GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<Player.PlayerLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<Player.PlayerLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
 
         int id;
 
+        @Override
+        public String toString() {
+            return "DroneBase{" + "coords=" + coords + ", speeds=" + speeds + ", id=" + id + '}' ;
+        }
+        
+        
+
     }
 
-    public abstract static class ZoneBase extends GamePos {
+    public abstract static class ZoneBase extends Player.PlayerLib.GamePos {
 
         int id;
         int owner;
         int turnowned;
+
+        @Override
+        public String toString() {
+            return "ZoneBase{" + "id=" + id + ", owner=" + owner + ", turnowned=" + turnowned + '}';
+        }
+        
+        
 
     }
 
@@ -183,6 +200,13 @@ public static class PlayerLib {
         int id;
         int nbControlled;
         final ArrayDeque<List<Integer>> controlHistorique = new ArrayDeque<>(supposedMaxTurn);
+
+        @Override
+        public String toString() {
+            return "PlayerBase{" + "id=" + id + ", nbControlled=" + nbControlled + ", controlHistorique=" + controlHistorique + '}';
+        }
+        
+        
     }
 
     public static abstract class BotBase<Dt extends DroneBase, Zt extends ZoneBase, Pt extends PlayerBase> {
@@ -341,7 +365,12 @@ public static class PlayerLib {
                 it.controlHistorique.add(owned);             
             }              
             
-            
+            if(debug_base){
+                System.err.println(""+players);
+                System.err.println(""+zones);
+                System.err.println(""+playerDrones);
+                
+            }
         }
 
         public void writeOrders(PrintStream out) {
@@ -354,8 +383,10 @@ public static class PlayerLib {
             _turn_Number++;
         }
 
-    }    
+    }
 }
+
+
     
     public static class Bot extends PlayerLib.BotBase<PlayerLib.DroneBase,PlayerLib.ZoneBase,PlayerLib.PlayerBase>{
 
