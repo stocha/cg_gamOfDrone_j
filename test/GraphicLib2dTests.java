@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 
-import codinggamedrone.GraphicLib2d;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,8 +82,33 @@ public class GraphicLib2dTests {
         Assert.assertEquals("Clothest java.awt.Point[x=-1,y=0]","Clothest "+GraphicLib2d.closestFrom(zer, tos));
         
         Assert.assertEquals("Farthest sort [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=0]]","Farthest sort "+GraphicLib2d.sortFarthestFrom(zer, tos));
-        Assert.assertEquals("Clothest sort [java.awt.Point[x=-1,y=0], java.awt.Point[x=2,y=0]]","Clothest sort "+GraphicLib2d.sortClothestFrom(zer, tos));        
+        Assert.assertEquals("Clothest sort [java.awt.Point[x=-1,y=0], java.awt.Point[x=2,y=0]]","Clothest sort "+GraphicLib2d.sortClothestFrom(zer, tos));   
+        
+        tos.add(new P(-1,1));
+        Assert.assertEquals("Closest elem [java.awt.Point[x=-1,y=0], java.awt.Point[x=-1,y=1]]","Closest elem "+GraphicLib2d.clothestElements( tos));
+        Assert.assertEquals("Farthest elem [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=1]]","Farthest elem "+GraphicLib2d.farthestElements(tos));
+        
+        //System.out.println();
         
     
     }
+    
+    @Test
+    public void testOtherFun(){
+
+        
+        P zer=new P(1,1);
+        P dir=new P(101,1);
+        
+        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 3));
+        
+        dir.cord().setLocation(-99,-99);
+        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 30));        
+        
+        //System.out.println();
+        
+    
+    }    
 }

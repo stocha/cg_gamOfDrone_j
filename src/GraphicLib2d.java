@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package codinggamedrone;
 
 import java.util.List;
 import java.awt.Point;
@@ -65,5 +64,57 @@ public class GraphicLib2d {
         Collections.sort(res,distance );
         return res;
     }    
+    
+    public static <T extends WithCoord> List<T> clothestElements(List<T> them){
+        List<T> res=new ArrayList<>(them.size());
+
+        double minDist=Double.MAX_VALUE;
+        T A=null;
+        T B=null;
+        for(T w : them) for(T w2 : them){
+            if(w==w2) continue;
+            double dist= w2.cord().distanceSq(w.cord());
+            if(dist < minDist){
+                minDist=dist;
+                A=w;B=w2;
+            }
+        }        
+        res.add(A);
+        res.add(B);
+        
+        return res;
+    }   
+    
+    public static <T extends WithCoord> List<T> farthestElements(List<T> them){
+        List<T> res=new ArrayList<>(them.size());
+
+        double minDist=Double.MAX_VALUE;
+        T A=null;
+        T B=null;
+        double maxDist=0;
+        for(T w : them) for(T w2 : them){
+            if(w==w2) continue;
+            double dist= w2.cord().distanceSq(w.cord());
+            if(dist > maxDist){
+                maxDist=dist;
+                A=w;B=w2;
+            }
+        }                 
+        res.add(A);
+        res.add(B);
+        
+        return res;
+    }     
+    
+    public static <T extends WithCoord> Point SegABatDistFromA(T A, T B, double dist){
+            double dd=A.cord().distance(B.cord());
+            if(dd==0) return A.cord();
+            double rat=dist/dd;
+            Point res=new Point(B.cord().x-A.cord().x, B.cord().y-A.cord().y);
+            res.setLocation(res.x*rat,res.y*rat);
+            res.setLocation(res.x+A.cord().x,res.y+A.cord().y);
+            
+            return res;
+    }
     
 }
