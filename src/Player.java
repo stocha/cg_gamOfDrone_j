@@ -605,13 +605,16 @@ public static class L3_FirstBot {
             void captureRessource(){
                 if(done) return;
                 
-                if(assignedResource.size()>=(int)context.avg_dronePerLegitimateZone) return;
-                for(int i=0;i<4;i++){
+                int souhai=(int)context.avg_dronePerZone+1;
+                if(assignedResource.size()>=souhai) return;
+                for(int i=0;i<souhai-assignedResource.size();i++){
                     if(context.freeDrone.isEmpty()) break;
                     
                     assignedResource.add(context.freeDrone.get(0));
                     context.freeDrone.removeAll(assignedResource);
                 }
+                
+                if(assignedResource.isEmpty())done=true;
             }
             
             void sendDrones(){
@@ -758,7 +761,7 @@ public static class L3_FirstBot {
                     System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone+1));
                 }
                 
-                if(eta>5 && context.freeDrone.size()>1 && mission.size() < 5){
+                if(eta>5 && mission.size() < context.Z){
                     mission.add(new MissionAttack(zr));
                 }
             }
@@ -921,6 +924,7 @@ public static class L3_FirstBot {
     }    
     
 }
+
 
 
 
