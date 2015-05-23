@@ -117,4 +117,14 @@ public class GraphicLib2d {
             return res;
     }
     
+    public static <T extends WithCoord> Point baryCenter(List<T> them){
+        Point res=new Point(0,0);
+        them.stream().forEach((w) -> {
+            res.setLocation(res.x+w.cord().x,res.y+w.cord().y);
+        });                 
+        res.setLocation(res.x/them.size(),res.y/them.size());
+        
+        return res;
+    }     
+    
 }

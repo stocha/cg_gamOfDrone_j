@@ -6,6 +6,7 @@
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -100,15 +101,22 @@ public class GraphicLib2dTests {
         P zer=new P(1,1);
         P dir=new P(101,1);
         
-        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 1));
-        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 3));
+        
+        
+        Assert.assertEquals("java.awt.Point[x=2,y=1]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        Assert.assertEquals("java.awt.Point[x=4,y=1]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 3));
         
         dir.cord().setLocation(-99,-99);
-        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 1));
-        System.out.println(GraphicLib2d.SegABatDistFromA(zer, dir, 30));        
+        Assert.assertEquals("java.awt.Point[x=0,y=0]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 1));
+        Assert.assertEquals("java.awt.Point[x=-20,y=-20]",""+GraphicLib2d.SegABatDistFromA(zer, dir, 30));        
         
         //System.out.println();
         
+        List<P> l= Arrays.asList(new P(-30,-10), new P(30,-10),new P(0,10));
+        Assert.assertEquals("java.awt.Point[x=0,y=-3]",""+GraphicLib2d.baryCenter(l));
+        
+        List<P> l2= Arrays.asList(new P(0,0), new P(0,100),new P(0,100));
+        Assert.assertEquals("java.awt.Point[x=0,y=66]",""+GraphicLib2d.baryCenter(l2));
     
     }    
 }
