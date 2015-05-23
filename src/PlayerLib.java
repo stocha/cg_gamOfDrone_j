@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,6 +20,9 @@ import java.util.Scanner;
 public class PlayerLib {
     
     private static boolean debug_base=true;
+    private static boolean debug_players=true;    
+    private static boolean debug_drones=true;
+    private static boolean debug_zones=true;
 
     static final int supposedMaxZone = 20;
     static final int maxDrones = 13;
@@ -41,12 +45,19 @@ public class PlayerLib {
         public void set(Point c) {
             cord.setLocation(c);
         }
+
+        @Override
+        public String toString() {
+            return "GamePos{" + "cord=" + cord + '}';
+        }
+        
+        
     }
 
     public abstract static class DroneBase extends Player.PlayerLib.GamePos {
 
-        final ArrayDeque<Player.PlayerLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
-        final ArrayDeque<Player.PlayerLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<PlayerLib.GamePos> coords = new ArrayDeque<>(supposedMaxTurn);
+        final ArrayDeque<PlayerLib.GamePos> speeds = new ArrayDeque<>(supposedMaxTurn);
 
         int id;
 
@@ -241,14 +252,42 @@ public class PlayerLib {
                 for(int z=0;z<Z;z++){
                     if(_owner[z]==it.id) owned.add(z);
                 }
-                it.controlHistorique.add(owned);             
+                it.controlHistorique.add(owned);  
+                it.nbControlled=owned.size();
             }              
             
-            if(debug_base){
-                System.err.println(""+players);
-                System.err.println(""+zones);
-                System.err.println(""+playerDrones);
+            // Les drones
+            for (int p = 0; p < P; p++) {
+                for (int d = 0; d < D; d++) {
+                    Dt it=playerDrones.get(p).get(d);
+                    it.cord.setLocation(_playerDronesCords[p][d]);
+                    PlayerLib.GamePos cc=new PlayerLib.GamePos();
+                    cc.set(_playerDronesCords[p][d]);
+
+                    PlayerLib.GamePos vc=new PlayerLib.GamePos();
+                    
+                    if(!it.coords.isEmpty()){
+                        GraphicLib2d.WithCoord prev=it.coords.getLast();
+                        vc.cord.setLocation(cc.cord.x-prev.cord().x,cc.cord.y-prev.cord().y);
+                    }
+                    
+                    it.speeds.add(vc);       
+                    it.coords.add(cc);
+                    
+                }                
                 
+            }
+            
+            // Debug
+            if(debug_base){
+                if(debug_players)
+                    System.err.println(""+players);
+                if(debug_zones)
+                    System.err.println(""+zones);
+                if(debug_drones)
+                    System.err.println(""+playerDrones);
+                System.err.println("Turn "+_turn_Number);
+                System.err.println("Control "+Arrays.asList(_turn_scoreControl));
             }
         }
 
