@@ -170,6 +170,8 @@ public class L3_FirstBot {
             
             }
             
+            applyMissionPlanning();
+            
             
         }
 

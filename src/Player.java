@@ -503,6 +503,14 @@ public static class L3_FirstBot {
         }
         
         
+        public void applyResourcesOrders(Point[] ordersOut){
+            for(Drone d : this.assignedResource){
+                ordersOut[d.id].setLocation(missionTarget.cord);
+            
+            }
+        }
+        
+        
         
     }
     
@@ -541,6 +549,16 @@ public static class L3_FirstBot {
            missionInitConquestProposed.removeAll(missionTransfert);
            missionActives.addAll(missionTransfert);
            missionTransfert.clear();
+           
+           freeDrone.removeAll(droneTransfert);
+           droneTransfert.clear();
+            
+        }
+        
+        private void applyMissionPlanning(){
+           for(Mission mi : missionInitConquestProposed){
+               mi.applyResourcesOrders(this._orders);
+           }            
             
         }
 
@@ -595,6 +613,7 @@ public static class L3_FirstBot {
     }    
     
 }
+
 
 
 
