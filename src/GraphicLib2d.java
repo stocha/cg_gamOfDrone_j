@@ -9,6 +9,7 @@ import java.util.List;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
@@ -19,12 +20,7 @@ public class GraphicLib2d {
     public interface WithCoord{
         Point cord();
     }
-    
-    public static Comparator<T extends WithCoord> distance = (e1, e2) -> Integer.compare(
-            e1.getEmployeeNumber(), e2.getEmployeeNumber());
 
-    employees.stream().sorted(byEmployeeNumber)
-            .forEach(e -> System.out.println(e)); 
     
     public static < T extends WithCoord> T farthestFrom(WithCoord cc,List<T> them){
         double maxDist=0;
@@ -55,7 +51,19 @@ public class GraphicLib2d {
     public static <T extends WithCoord> List<T> sortFarthestFrom(WithCoord cc, List<T> them){
         List<T> res=new ArrayList<>(them.size());
         res.addAll(them);
-        Collections.sort(res, );
+        final Comparator<WithCoord> distance;
+        distance = (e1, e2) -> (int)(e2.cord().distanceSq(cc.cord())-e1.cord().distanceSq(cc.cord()));
+        Collections.sort(res,distance );
+        return res;
     }
+    
+    public static <T extends WithCoord> List<T> sortClothestFrom(WithCoord cc, List<T> them){
+        List<T> res=new ArrayList<>(them.size());
+        res.addAll(them);
+        final Comparator<WithCoord> distance;
+        distance = (e1, e2) -> (int)(e1.cord().distanceSq(cc.cord())-e2.cord().distanceSq(cc.cord()));
+        Collections.sort(res,distance );
+        return res;
+    }    
     
 }
