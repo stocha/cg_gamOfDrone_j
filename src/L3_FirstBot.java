@@ -128,17 +128,19 @@ public class L3_FirstBot {
             List<Drone> assignedResource=new ArrayList<>(L1_BaseBotLib.maxDrones);
             Zone missionTarget=null;    
             
-            int nbTurns=5;
+            int nbTurns=9;
             boolean done=false;
+            int desiredTeam=0;
             
-            MissionAttack(Zone cible){
+            MissionAttack(Zone cible,int desiredteam){
                 missionTarget=cible;
+                this.desiredTeam=desiredteam;
             }
             
             void captureRessource(){
                 if(done) return;
                 
-                int souhai=(int)context.avg_dronePerZone+1;
+                int souhai=desiredTeam;
                 if(assignedResource.size()>=souhai) return;
                 for(int i=0;i<souhai-assignedResource.size();i++){
                     if(context.freeDrone.isEmpty()) break;
@@ -296,7 +298,7 @@ public class L3_FirstBot {
                 }
                 
                 if(eta>5 && mission.size() < context.Z && zr.owner!=context.ID){
-                    mission.add(new MissionAttack(zr));
+                    mission.add(new MissionAttack(zr,(int)context.avg_dronePerLegitimateZone+1));
                 }
             }
             
