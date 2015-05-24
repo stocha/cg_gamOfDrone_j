@@ -484,13 +484,6 @@ public static class L1_BaseBotLib {
 }
 
 
-
-
-
-/**
- *
- * @author Jahan
- */
 public static class L3_FirstBot {
 
     static final boolean debugPlanner_calcMenace = true;
@@ -892,9 +885,10 @@ public static class L3_FirstBot {
             toTry.addAll(ene);
 
             if (!context.freeDrone.isEmpty()) {
-                Point cc = L0_GraphicLib2d.baryCenter(context.freeDrone);
+                Point cc = L0_GraphicLib2d.baryCenter(context.zones);
                 L1_BaseBotLib.GamePos gp = new L1_BaseBotLib.GamePos();
                 gp.cord.setLocation(cc);
+                            
                 while (!context.freeDrone.isEmpty() && !toTry.isEmpty()) {
                     if (toTry.size() == 1) {
                         SimpleMissions mi = new SimpleMissions(toTry.get(0));
@@ -906,9 +900,21 @@ public static class L3_FirstBot {
                         }
                         break;
                     }
+                    
+  
 
                     Zone z = L0_GraphicLib2d.closestFrom(gp, toTry);
-                    double d = z.cord.distance(gp.cord);
+                    List<Drone> closeOnes=new ArrayList<>();
+                    int szl=this.sectorResource.get(z.id).size();
+                    for(int i=0;i<szl && i<(context.D / 2 )+1 ;i++){
+                        closeOnes.add(sectorResource.get(z.id).get(i).d);
+                    }
+                    
+                    cc = L0_GraphicLib2d.baryCenter(closeOnes);
+                    L1_BaseBotLib.GamePos myCenter = new L1_BaseBotLib.GamePos();
+                    myCenter.cord.setLocation(cc);                      
+                    
+                    double d = z.cord.distance(myCenter.cord);
                     int TT = (int) (d / L1_BaseBotLib.lvl0Dist);
                     TT += 3;
 
@@ -921,8 +927,8 @@ public static class L3_FirstBot {
                         for (int i = 0; i < sent.size(); i++) {
                             mi.addDrone(sent.get(i));
                         }
-                        break;
                     }
+                    toTry.remove(z);
                 }
             }
 
@@ -1077,7 +1083,6 @@ public static class L3_FirstBot {
     }
 
 }
-
 
 
 
