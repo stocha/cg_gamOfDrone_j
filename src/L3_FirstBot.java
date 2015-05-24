@@ -369,18 +369,7 @@ public class L3_FirstBot {
                 if (mission.size() < 3) {
                     mission.add(new MissionAttack(zr, force+1));
                 }
-            }             
-            List<MissionAttack> rm = new ArrayList<>();
-            for (MissionAttack a : mission) {
-                a.captureRessource();
-                a.releaseRessource();
-                if (a.isDone()) {
-                    rm.add(a);
-                }
-                a.sendDrones();
-            }
-
-            mission.removeAll(rm);                       
+            }                                 
 
             for (Zone zr : mine) {
 
@@ -421,17 +410,33 @@ public class L3_FirstBot {
                         }
                     }
                     int menace=ef-enroute.size();
-                    for(int i=0;i<menace;i++){
+                    if(debugPlanner){
+                        System.err.println("En route pour "+zr.id+" enemy force card "+ef);
+                        System.err.println(""+enroute);
+                    }
+                    int sent=0;
                         for(Menace r : sectorResource.get(zr.id)){
-                            if(enroute.contains(r.d)) continue;
+                            if(!enroute.contains(r.d)&&sent<menace&&(context._orders[r.d.id].x==20))
                             {
+                                sent++;
                                 context._orders[r.d.id].setLocation(zr.cord);
                             }
                         }
-                    }
                 }
 
             }
+            
+            List<MissionAttack> rm = new ArrayList<>();
+            for (MissionAttack a : mission) {
+                a.captureRessource();
+                a.releaseRessource();
+                if (a.isDone()) {
+                    rm.add(a);
+                }
+                a.sendDrones();
+            }
+
+            mission.removeAll(rm);               
 
 
             Point center = null;
