@@ -213,7 +213,8 @@ public class L3_FirstBot {
 
             void sendDrones() {
                 for (Drone d : assignedResource) {
-                    context._orders[d.id].setLocation(missionTarget.cord);
+                    if(context._orders[d.id].x==20 && context._orders[d.id].y==20)
+                        context._orders[d.id].setLocation(missionTarget.cord);
                 }
             }
 
