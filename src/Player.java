@@ -482,8 +482,6 @@ public static class L1_BaseBotLib {
 
     }
 }
-
-
 public static class L3_FirstBot {
 
     static final boolean debugPlanner_calcMenace = true;
@@ -679,7 +677,6 @@ public static class L3_FirstBot {
 
             void sendDrones() {
                 for (Drone d : assignedResource) {
-                    if(context._orders[d.id].x==20 && context._orders[d.id].y==20)
                         context._orders[d.id].setLocation(missionTarget.cord);
                 }
             }
@@ -811,6 +808,24 @@ public static class L3_FirstBot {
         public int etaForMenaceLevel(Zone z, int level) {
             return 0;
         }
+        
+        private void pre_plan(){
+            List<MissionAttack> rm = new ArrayList<>();
+            for (MissionAttack a : mission) {
+                a.releaseRessource();          
+                if (a.isDone()) {
+                    rm.add(a);
+                }
+            }
+            mission.removeAll(rm); 
+        }
+        
+        private void post_plan(){
+            for (MissionAttack a : mission) {
+                a.captureRessource();
+                a.sendDrones();
+            }            
+        }
 
         public void plan() {
             List<Zone> mine = new ArrayList<>(context.Z);
@@ -827,108 +842,14 @@ public static class L3_FirstBot {
 
 
             for (Zone zr : ene) {                
-                int force;
-                if(zr.owner!=-1)
-                    force=sectorMenace.get(zr.owner).get(zr.id).size();else{
-                    force=0;
-                }
-                if (mission.size() < 3) {
-                    mission.add(new MissionAttack(zr, force+1));
-                }
+
             }                                 
 
             for (Zone zr : mine) {
 
-                for (int p = 0; p < context.P; p++) {
-                    if(p==context.ID) continue;
-                    int currEta = 0;
-                    int ef = 0;
-                    int ff = 0;
-
-                    int ind = 0;
-                    Menace myfor = null;
-                    List<Drone> enroute = new ArrayList<>(context.D);
-
-                    if (sectorResource.get(zr.id).size() > ind) {
-                        myfor = sectorResource.get(zr.id).get(ind++);
-                    }
-
-                    for (Menace m : sectorMenace.get(p).get(zr.id)) {
-                        if (m.eta == currEta) {
-                            ef++;
-                        }
-                        if (m.eta > currEta) {
-                            currEta = m.eta;
-                            ef++;
-                        }
-
-                        while (myfor != null && myfor.eta <= currEta) {
-                            ff++;
-
-                            if (ff >= ef) {
-                                enroute.add(myfor.d);
-                            }
-
-                            if (sectorResource.get(zr.id).size() > ind) {
-                                myfor = sectorResource.get(zr.id).get(ind++);
-                            } else {
-                                myfor = null;
-                            }
-                        }
-                    }
-                    int menace=ef;
-                    if(debugPlanner){
-                        System.err.println("En route pour "+zr.id+" enemy force card "+menace+" by "+p);
-                        System.err.println(""+enroute);
-                    }
-                    int sent=0;
-                    while(sent < menace && sent <enroute.size()){                        
-                        context._orders[enroute.get(sent).id].setLocation(zr.cord);
-                        sent++;
-                    }
-                    int id=0;
-                    while(sent < menace && id <sectorResource.get(zr.id).size()){ 
-                        Menace r=sectorResource.get(zr.id).get(id);
-                            if(!enroute.contains(r.d)&&sent<menace&&(context._orders[r.d.id].x==20))
-                            {
-                                sent++;
-                                context._orders[r.d.id].setLocation(zr.cord);
-                            }      
-                            
-                            id++;
-                    }
-                }
-
-            }
-            
-            List<MissionAttack> rm = new ArrayList<>();
-            for (MissionAttack a : mission) {
-                a.captureRessource();
-                a.releaseRessource();
-                if (a.isDone()) {
-                    rm.add(a);
-                }
-                a.sendDrones();
             }
 
-            mission.removeAll(rm);               
-
-
-            Point center = null;
-
-            if (!mine.isEmpty()) {
-                center = L0_GraphicLib2d.baryCenter(mine);
-            }
-            if (center
-                    == null) {
-                center = new Point(2000, 800);
-            }
-            for (Drone d
-                    : context.freeDrone) {
-                
-                if(context._orders[d.id].x==20 && context._orders[d.id].y==20)
-                    context._orders[d.id].setLocation(center);
-            }
+            post_plan();
 
         }
     }
@@ -1079,6 +1000,7 @@ public static class L3_FirstBot {
     }
 
 }
+
 
 
     
