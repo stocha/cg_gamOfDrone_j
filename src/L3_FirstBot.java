@@ -374,6 +374,7 @@ public class L3_FirstBot {
             for (Zone zr : mine) {
 
                 for (int p = 0; p < context.P; p++) {
+                    if(p==context.ID) continue;
                     int currEta = 0;
                     int ef = 0;
                     int ff = 0;
@@ -409,19 +410,27 @@ public class L3_FirstBot {
                             }
                         }
                     }
-                    int menace=ef-enroute.size();
+                    int menace=ef;
                     if(debugPlanner){
-                        System.err.println("En route pour "+zr.id+" enemy force card "+ef);
+                        System.err.println("En route pour "+zr.id+" enemy force card "+menace+" by "+p);
                         System.err.println(""+enroute);
                     }
                     int sent=0;
-                        for(Menace r : sectorResource.get(zr.id)){
+                    while(sent < menace && sent <enroute.size()){                        
+                        context._orders[enroute.get(sent).id].setLocation(zr.cord);
+                        sent++;
+                    }
+                    int id=0;
+                    while(sent < menace && id <sectorResource.get(zr.id).size()){ 
+                        Menace r=sectorResource.get(zr.id).get(id);
                             if(!enroute.contains(r.d)&&sent<menace&&(context._orders[r.d.id].x==20))
                             {
                                 sent++;
                                 context._orders[r.d.id].setLocation(zr.cord);
-                            }
-                        }
+                            }      
+                            
+                            id++;
+                    }
                 }
 
             }

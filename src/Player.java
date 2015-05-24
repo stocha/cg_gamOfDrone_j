@@ -482,10 +482,6 @@ public static class L1_BaseBotLib {
 
     }
 }
-
-
-
-
 public static class L3_FirstBot {
 
     static final boolean debugPlanner_calcMenace = true;
@@ -837,22 +833,12 @@ public static class L3_FirstBot {
                 if (mission.size() < 3) {
                     mission.add(new MissionAttack(zr, force+1));
                 }
-            }             
-            List<MissionAttack> rm = new ArrayList<>();
-            for (MissionAttack a : mission) {
-                a.captureRessource();
-                a.releaseRessource();
-                if (a.isDone()) {
-                    rm.add(a);
-                }
-                a.sendDrones();
-            }
-
-            mission.removeAll(rm);                       
+            }                                 
 
             for (Zone zr : mine) {
 
                 for (int p = 0; p < context.P; p++) {
+                    if(p==context.ID) continue;
                     int currEta = 0;
                     int ef = 0;
                     int ff = 0;
@@ -888,18 +874,42 @@ public static class L3_FirstBot {
                             }
                         }
                     }
-                    int menace=ef-enroute.size();
-                    for(int i=0;i<menace;i++){
-                        for(Menace r : sectorResource.get(zr.id)){
-                            if(enroute.contains(r.d)) continue;
+                    int menace=ef;
+                    if(debugPlanner){
+                        System.err.println("En route pour "+zr.id+" enemy force card "+menace+" by "+p);
+                        System.err.println(""+enroute);
+                    }
+                    int sent=0;
+                    while(sent < menace && sent <enroute.size()){                        
+                        context._orders[enroute.get(sent).id].setLocation(zr.cord);
+                        sent++;
+                    }
+                    int id=0;
+                    while(sent < menace && id <sectorResource.get(zr.id).size()){ 
+                        Menace r=sectorResource.get(zr.id).get(id);
+                            if(!enroute.contains(r.d)&&sent<menace&&(context._orders[r.d.id].x==20))
                             {
+                                sent++;
                                 context._orders[r.d.id].setLocation(zr.cord);
-                            }
-                        }
+                            }      
+                            
+                            id++;
                     }
                 }
 
             }
+            
+            List<MissionAttack> rm = new ArrayList<>();
+            for (MissionAttack a : mission) {
+                a.captureRessource();
+                a.releaseRessource();
+                if (a.isDone()) {
+                    rm.add(a);
+                }
+                a.sendDrones();
+            }
+
+            mission.removeAll(rm);               
 
 
             Point center = null;
@@ -1068,7 +1078,6 @@ public static class L3_FirstBot {
 
 
 
-    
     
     public static class Bot extends L1_BaseBotLib.BotBase<L1_BaseBotLib.DroneBase,L1_BaseBotLib.ZoneBase,L1_BaseBotLib.PlayerBase>{
 
