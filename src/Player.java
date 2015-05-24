@@ -482,6 +482,8 @@ public static class L1_BaseBotLib {
 
     }
 }
+
+
 public static class L3_FirstBot {
 
     static final boolean debugPlanner_calcMenace = true;
@@ -923,7 +925,9 @@ public static class L3_FirstBot {
             }
             for (Drone d
                     : context.freeDrone) {
-                context._orders[d.id].setLocation(center);
+                
+                if(context._orders[d.id].x==20 && context._orders[d.id].y==20)
+                    context._orders[d.id].setLocation(center);
             }
 
         }
@@ -1075,7 +1079,6 @@ public static class L3_FirstBot {
     }
 
 }
-
 
 
     
