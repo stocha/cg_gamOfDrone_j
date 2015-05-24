@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 /*
@@ -486,7 +487,7 @@ public static class L1_BaseBotLib {
 
 public static class L3_FirstBot {
     
-    static final boolean debugPlanner=false;
+    static final boolean debugPlanner=true;
     
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
@@ -581,6 +582,55 @@ public static class L3_FirstBot {
     
     public static class AttackDefPlanner{
         
+        public static class Menace implements Comparable<Menace>{
+            final Drone d;
+            final int eta;
+
+            public Menace(Drone d, int eta) {
+                this.d = d;
+                this.eta = eta;
+            }
+
+            @Override
+            public int hashCode() {
+                int hash = 7;
+                hash = 67 * hash + Objects.hashCode(this.d);
+                hash = 67 * hash + this.eta;
+                return hash;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == null) {
+                    return false;
+                }
+                if (getClass() != obj.getClass()) {
+                    return false;
+                }
+                final Menace other = (Menace) obj;
+                if (!Objects.equals(this.d, other.d)) {
+                    return false;
+                }
+                if (this.eta != other.eta) {
+                    return false;
+                }
+                return true;
+            }
+
+
+            @Override
+            public String toString() {
+                return "{" + "d=" + d.id + ", eta=" + eta + '}';
+            }
+
+            @Override
+            public int compareTo(Menace t) {
+                return t.eta-this.eta;
+            }
+            
+            
+        }
+        
         public class MissionAttack{
 
             @Override
@@ -650,8 +700,7 @@ public static class L3_FirstBot {
         final static int maxEtaCalc=60;
         
         Bot context=null;
-        private final List<List<Drone>> sectorMenac;
-        private final List<List<Integer>> etamenace;
+        private final List<List<Menace>> sectorMenace;
         private final List<Drone> sectorRessource;
         private final List<Integer> etaressourceEta;
         
@@ -668,11 +717,9 @@ public static class L3_FirstBot {
         public AttackDefPlanner(Bot context) {
             this.context = context;
             
-            sectorMenac=new ArrayList<>(context.Z);
-            etamenace=new ArrayList<>(context.Z);
+            sectorMenace=new ArrayList<>(context.Z);
             for(int z=0;z<context.Z;z++){
-                sectorMenac.add(new ArrayList<>(context.D));
-                etamenace.add(new ArrayList<>(context.D));
+                sectorMenace.add(new ArrayList<>(context.D));
             }
             sectorRessource=new ArrayList<>(context.D);
             etaressourceEta=new ArrayList<>(context.D);
@@ -681,9 +728,8 @@ public static class L3_FirstBot {
         public void calcNamedMenaces(){
             
             // Clear
-            for(int i=0;i<sectorMenac.size();i++){
-                sectorMenac.get(i).clear();
-                etamenace.get(i).clear();
+            for(int i=0;i<sectorMenace.size();i++){
+                sectorMenace.get(i).clear();
             }
            sectorRessource.clear();
            etaressourceEta.clear();
@@ -705,8 +751,7 @@ public static class L3_FirstBot {
                                sectorRessource.add(dr);
                                etaressourceEta.add(etapes);
                            }else{
-                               sectorMenac.get(z).add(dr);
-                               etamenace.get(z).add(etan);
+                               sectorMenace.get(z).add(new Menace(dr,etan));
                            }
                        }
                    }
@@ -714,15 +759,21 @@ public static class L3_FirstBot {
                }
                
            }
+           for(int i=0;i<sectorMenace.size();i++){
+                Collections.sort(sectorMenace.get(i));
+                if(debugPlanner){
+                    System.err.println("Zone "+i+" eta "+sectorMenace.get(i));
+                }                
+           }
         }// CalcMenace
         
         public int etaForMenaceLevel(Zone zr,int nbDroneEnemy){
             int[][] nbThreatPerEta=new int[context.P][maxEtaCalc];
             
-            List<Drone> menDr=sectorMenac.get(zr.id);
+            List<Menace> menDr=sectorMenace.get(zr.id);
             for(int i=0;i<menDr.size();i++){
-                Drone dr=menDr.get(i);
-                nbThreatPerEta[dr.owner][etamenace.get(zr.id).get(i)]++;             
+                Drone dr=menDr.get(i).d;
+                nbThreatPerEta[dr.owner][menDr.get(i).eta]++;             
             }
             
             int[] etaPerPlayer=new int[context.P];
@@ -738,8 +789,6 @@ public static class L3_FirstBot {
             int min=Integer.MAX_VALUE;
             for(int i=0;i<context.P;i++){
                 if(i==context.ID) continue;
-                if(debugPlanner)
-                    System.err.println("z "+zr.id +" p"+i+" etaConst "+etaPerPlayer[i]);
                 if(min>etaPerPlayer[i]){
                     min=etaPerPlayer[i];
                 }
@@ -752,9 +801,9 @@ public static class L3_FirstBot {
             
             {
             int i=0;
-                for(Drone d : sectorMenac.get(zr.id)){
-                    if(etamenace.get(zr.id).get(i)<10){
-                        countP[d.owner]++;
+                for(Menace d : sectorMenace.get(zr.id)){
+                    if(d.eta<10){
+                        countP[d.d.owner]++;
                     }
                     i++;
                 }
@@ -770,9 +819,7 @@ public static class L3_FirstBot {
         
         public void plan(){
             List<Zone> mine=new ArrayList<>();
-            List<Zone> ene=new ArrayList<>();
-            
-            if(debugPlanner) {System.err.println(""+etamenace);}
+            List<Zone> ene=new ArrayList<>();           
             
             for(Zone zr : context.zones){
                 if(zr.owner!=context.ID) continue;
@@ -788,11 +835,7 @@ public static class L3_FirstBot {
                 if(zr.owner==context.ID) mine.add(zr);
                 else if(zr.owner==-1) ene.add(zr);
                 
-                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerZone);
-                
-                if(debugPlanner){
-                    System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone));
-                }
+                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerZone);                
                 
                 if(eta>5 && mission.size() < 3 && zr.owner!=context.ID){
                     mission.add(new MissionAttack(zr,(int)context.avg_dronePerLegitimateZone+1));
@@ -967,6 +1010,7 @@ public static class L3_FirstBot {
     }    
     
 }
+
 
 
 

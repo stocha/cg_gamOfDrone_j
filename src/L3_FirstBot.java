@@ -21,7 +21,7 @@ import java.util.Objects;
  */
 public class L3_FirstBot {
     
-    static final boolean debugPlanner=false;
+    static final boolean debugPlanner=true;
     
     static final int expectedMissionMax=L1_BaseBotLib.supposedMaxTurn*L1_BaseBotLib.supposedMaxZone;
     
@@ -116,7 +116,7 @@ public class L3_FirstBot {
     
     public static class AttackDefPlanner{
         
-        public static class Menace implements Comparator<Menace>{
+        public static class Menace implements Comparable<Menace>{
             final Drone d;
             final int eta;
 
@@ -151,14 +151,15 @@ public class L3_FirstBot {
                 return true;
             }
 
-            @Override
-            public int compare(Menace t, Menace t1) {
-                return t1.eta-t.eta;
-            }
 
             @Override
             public String toString() {
                 return "{" + "d=" + d.id + ", eta=" + eta + '}';
+            }
+
+            @Override
+            public int compareTo(Menace t) {
+                return -t.eta+this.eta;
             }
             
             
@@ -292,6 +293,12 @@ public class L3_FirstBot {
                }
                
            }
+           for(int i=0;i<sectorMenace.size();i++){
+                Collections.sort(sectorMenace.get(i));
+                if(debugPlanner){
+                    System.err.println("Zone "+i+" eta "+sectorMenace.get(i));
+                }                
+           }
         }// CalcMenace
         
         public int etaForMenaceLevel(Zone zr,int nbDroneEnemy){
@@ -316,8 +323,6 @@ public class L3_FirstBot {
             int min=Integer.MAX_VALUE;
             for(int i=0;i<context.P;i++){
                 if(i==context.ID) continue;
-                if(debugPlanner)
-                    System.err.println("z "+zr.id +" p"+i+" etaConst "+etaPerPlayer[i]);
                 if(min>etaPerPlayer[i]){
                     min=etaPerPlayer[i];
                 }
@@ -348,9 +353,7 @@ public class L3_FirstBot {
         
         public void plan(){
             List<Zone> mine=new ArrayList<>();
-            List<Zone> ene=new ArrayList<>();
-            
-            if(debugPlanner) {System.err.println(""+sectorMenace);}
+            List<Zone> ene=new ArrayList<>();           
             
             for(Zone zr : context.zones){
                 if(zr.owner!=context.ID) continue;
@@ -366,11 +369,7 @@ public class L3_FirstBot {
                 if(zr.owner==context.ID) mine.add(zr);
                 else if(zr.owner==-1) ene.add(zr);
                 
-                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerZone);
-                
-                if(debugPlanner){
-                    System.err.println("Zone "+zr.id+" eta "+eta+" for menace "+(context.avg_dronePerLegitimateZone));
-                }
+                int eta=etaForMenaceLevel(zr, (int)context.avg_dronePerZone);                
                 
                 if(eta>5 && mission.size() < 3 && zr.owner!=context.ID){
                     mission.add(new MissionAttack(zr,(int)context.avg_dronePerLegitimateZone+1));
