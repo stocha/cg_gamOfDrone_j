@@ -55,7 +55,16 @@ public class L3_FirstBotTest {
         init+="1 1\n"; // Z CENTER X Y
         
         init+="-1 \n"; // control turn 1
-        init+="1 1\n"; // turn 1 p1 b CENTER X Y               
+        init+="1 1\n"; // turn 1 p1 b CENTER X Y         
+        
+        init+="-1 \n"; // control turn 1
+        init+="1 1\n"; // turn 1 p1 b CENTER X Y          
+        
+        init+="-1 \n"; // control turn 1
+        init+="1 1\n"; // turn 1 p1 b CENTER X Y         
+        
+        init+="-1 \n"; // control turn 1
+        init+="1 1\n"; // turn 1 p1 b CENTER X Y           
         
         
         InputStream stream = new ByteArrayInputStream(init.getBytes(StandardCharsets.UTF_8));
@@ -64,6 +73,14 @@ public class L3_FirstBotTest {
         b.readTurn();
         b.doPrepareOrder();
         b.writeOrders(System.out);
+        
+        b.readTurn();
+        b.doPrepareOrder();
+        b.writeOrders(System.out);
+        
+        b.readTurn();
+        b.doPrepareOrder();
+        b.writeOrders(System.out);        
         
         
     }

@@ -489,7 +489,6 @@ public static class L1_BaseBotLib {
 
 
 
-
 public static class L3_FirstBot {
     
     static final boolean debugPlanner=true;
@@ -759,14 +758,11 @@ public static class L3_FirstBot {
                
            }
            for(int p=0;p<context.P;p++){
-                for(int i=0;i<sectorMenace.size();i++){
+                for(int i=0;i<context.Z;i++){
                      Collections.sort(sectorMenace.get(p).get(i));
                      if(debugPlanner){
-                         System.err.println("p "+p+" Zone "+i+" eta "+sectorMenace.get(i));                     
+                         System.err.println("p "+p+" Zone "+i+" eta "+sectorMenace.get(p).get(i));                     
                      }    
-                    if(debugPlanner){
-                    System.err.println();    
-                    }
                 }
            }
       
