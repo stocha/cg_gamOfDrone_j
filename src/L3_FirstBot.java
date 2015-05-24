@@ -171,43 +171,47 @@ public class L3_FirstBot {
 
             @Override
             public String toString() {
-                return "MissionAttack{" + "assignedResource=" + assignedResource.size() + ", missionTarget=" + missionTarget+", done=" + done + '}';
+                return "MissionAttack{" + "assignedResource=" + assignedResource.size() + ", missionTarget=" + missionTarget + ", done=" + done + '}';
             }
 
             List<Drone> assignedResource = new ArrayList<>(L1_BaseBotLib.maxDrones);
             L0_GraphicLib2d.WithCoord missionTarget = null;
 
             boolean done = false;
-            int lived=0;
-            int life=1;
+            int lived = 0;
+            int life = 1;
 
             SimpleMissions(L0_GraphicLib2d.WithCoord cible) {
                 missionTarget = cible;
             }
 
             void addDrone(Drone d) {
-                    assignedResource.add(d);
-                    context.freeDrone.removeAll(assignedResource);
+                assignedResource.add(d);
+                context.freeDrone.removeAll(assignedResource);
             }
 
             void sendDrones() {
                 for (Drone d : assignedResource) {
-                        context._orders[d.id].setLocation(missionTarget.cord());
+                    context._orders[d.id].setLocation(missionTarget.cord());
                 }
                 lived++;
             }
 
             boolean releaseRessource() {
-                if(lived>=life ) done=true; else return false;
-                
-                if ( assignedResource.isEmpty()) {
+                if (lived >= life) {
+                    done = true;
+                } else {
+                    return false;
+                }
+
+                if (assignedResource.isEmpty()) {
                     return true;
                 }
 
                 context.freeDrone.addAll(assignedResource);
                 assignedResource.clear();
                 done = true;
-                
+
                 return done;
             }
 
@@ -309,26 +313,73 @@ public class L3_FirstBot {
 
         }// CalcMenace
 
-        
-        private void pre_plan(){
+        private int menaceMaxByPAtZforTime(int p, int z, int t) {
+            List<Menace> lm = sectorMenace.get(p).get(z);
+            if (lm.isEmpty()) {
+                return 0;
+            }
+            int count = 0;
+
+            for (Menace m : lm) {
+                if (m.eta <= t) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private int maxMenaceAtZForTime(int z, int t) {
+            int[] men = new int[context.P];
+            for (int p = 0; p < context.P; p++) {
+                men[p] = menaceMaxByPAtZforTime(p, z, t);
+            }
+
+            int max = 0;
+            for (int p = 0; p < context.P; p++) {
+                if (men[p] > max) {
+                    max = men[p];
+                }
+            }
+
+            return max;
+        }
+
+        private int supportAtZForT(int z, int t) {
+            List<Menace> lm = sectorResource.get(z);
+            if (lm.isEmpty()) {
+                return 0;
+            }
+            int count = 0;
+
+            for (Menace m : lm) {
+                if (m.eta <= t) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private void pre_plan() {
             List<SimpleMissions> rm = new ArrayList<>();
-            for (SimpleMissions a : mission) {        
+            for (SimpleMissions a : mission) {
                 if (a.releaseRessource()) {
                     rm.add(a);
                 }
             }
-            mission.removeAll(rm); 
+            mission.removeAll(rm);
         }
-        
-        private void post_plan(){
+
+        private void post_plan() {
             for (SimpleMissions a : mission) {
                 a.sendDrones();
-            }            
+            }
         }
 
         public void plan() {
             pre_plan();
-            
+
             List<Zone> mine = new ArrayList<>(context.Z);
             List<Zone> ene = new ArrayList<>(context.Z);
 
@@ -339,15 +390,67 @@ public class L3_FirstBot {
                     ene.add(zr);
                 }
             }
-            
+
             // Application a nos colonies a nous
             for (Zone zr : mine) {
-                    
+                List<Drone> candidates = new ArrayList<>();
+                for (Menace def : sectorResource.get(zr.id)) {
+                    if (def.eta > 0) {
+                        break;
+                    }
+                    candidates.add(def.d);
+                }
+                int men0 = maxMenaceAtZForTime(zr.id, 1);
+                if (men0 <= candidates.size()) {
+                    int men10 = maxMenaceAtZForTime(zr.id, 10);
+                    int sent = Math.min(candidates.size(), men10);
+
+                    SimpleMissions mi = new SimpleMissions(zr);
+                    mission.add(mi);
+                    for (int i = 0; i < sent; i++) {
+                        mi.addDrone(sectorResource.get(zr.id).get(i).d);
+                    }
+                }
+
             }
 
-            for (Zone zr : ene) {                
+            List<Zone> toTry = new ArrayList<>(20);
+            toTry.addAll(ene);
 
-            }                                 
+            if (!context.freeDrone.isEmpty()) {
+                Point cc = L0_GraphicLib2d.baryCenter(context.freeDrone);
+                L1_BaseBotLib.GamePos gp = new L1_BaseBotLib.GamePos();
+                gp.cord.setLocation(cc);
+                while (!context.freeDrone.isEmpty() && !toTry.isEmpty()) {
+                    if (toTry.size() == 1) {
+                        SimpleMissions mi = new SimpleMissions(toTry.get(0));
+                        mission.add(mi);
+                        List<Drone> sent = new ArrayList<>();
+                        sent.addAll(context.freeDrone);
+                        for (int i = 0; i < sent.size(); i++) {
+                            mi.addDrone(sent.get(i));
+                        }
+                        break;
+                    }
+
+                    Zone z = L0_GraphicLib2d.closestFrom(gp, toTry);
+                    double d = z.cord.distance(gp.cord);
+                    int TT = (int) (d / L1_BaseBotLib.lvl0Dist);
+                    TT += 3;
+
+                    int men = maxMenaceAtZForTime(z.id, TT);
+                    if (men <= context.D / 2) {
+                        SimpleMissions mi = new SimpleMissions(toTry.get(0));
+                        mission.add(mi);
+                        List<Drone> sent = new ArrayList<>();
+                        sent.addAll(context.freeDrone);
+                        for (int i = 0; i < sent.size(); i++) {
+                            mi.addDrone(sent.get(i));
+                        }
+                        break;
+                    }
+                }
+            }
 
             post_plan();
 
@@ -435,7 +538,7 @@ public class L3_FirstBot {
         }
 
         private void markFreeDrone() {
-        //for(Drone d : freeDrone){
+            //for(Drone d : freeDrone){
             //   _orders[d.id].setLocation(new Point(0,0));
             //}
             AttackDefPlanner adp = AttackDefPlanner.inst(this);
