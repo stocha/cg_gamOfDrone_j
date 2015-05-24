@@ -253,7 +253,7 @@ public class L3_FirstBot {
             for(int p=0;p<context.P;p++){
                 sectorMenace.add(new ArrayList<>(context.Z));
                 for(int z=0;z<context.Z;z++){
-                    sectorMenace.add(new ArrayList<>(context.D));
+                    sectorMenace.get(p).add(new ArrayList<>(context.D));
                 }
             }
         }
@@ -262,7 +262,7 @@ public class L3_FirstBot {
             
             // Clear
             for(int p=0;p<context.P;p++){
-                for(int i=0;i<sectorMenace.size();i++){
+                for(int i=0;i<context.Z;i++){
                     sectorMenace.get(p).get(i).clear();
                 }
             }
@@ -292,7 +292,10 @@ public class L3_FirstBot {
                      Collections.sort(sectorMenace.get(p).get(i));
                      if(debugPlanner){
                          System.err.println("p "+p+" Zone "+i+" eta "+sectorMenace.get(i));                     
-                     }                
+                     }    
+                    if(debugPlanner){
+                    System.err.println();    
+                    }
                 }
            }
       

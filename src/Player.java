@@ -485,6 +485,11 @@ public static class L1_BaseBotLib {
     }
 }
 
+
+
+
+
+
 public static class L3_FirstBot {
     
     static final boolean debugPlanner=true;
@@ -625,7 +630,7 @@ public static class L3_FirstBot {
 
             @Override
             public int compareTo(Menace t) {
-                return t.eta-this.eta;
+                return -t.eta+this.eta;
             }
             
             
@@ -700,9 +705,7 @@ public static class L3_FirstBot {
         final static int maxEtaCalc=60;
         
         Bot context=null;
-        private final List<List<Menace>> sectorMenace;
-        private final List<Drone> sectorRessource;
-        private final List<Integer> etaressourceEta;
+        private final List<List<List<Menace>>> sectorMenace; // player // zone // drone
         
         private static AttackDefPlanner inst=null;
         private static AttackDefPlanner inst(Bot con){
@@ -717,22 +720,23 @@ public static class L3_FirstBot {
         public AttackDefPlanner(Bot context) {
             this.context = context;
             
-            sectorMenace=new ArrayList<>(context.Z);
-            for(int z=0;z<context.Z;z++){
-                sectorMenace.add(new ArrayList<>(context.D));
+            sectorMenace=new ArrayList<>(context.P);
+            for(int p=0;p<context.P;p++){
+                sectorMenace.add(new ArrayList<>(context.Z));
+                for(int z=0;z<context.Z;z++){
+                    sectorMenace.get(p).add(new ArrayList<>(context.D));
+                }
             }
-            sectorRessource=new ArrayList<>(context.D);
-            etaressourceEta=new ArrayList<>(context.D);
         }
         
         public void calcNamedMenaces(){
             
             // Clear
-            for(int i=0;i<sectorMenace.size();i++){
-                sectorMenace.get(i).clear();
+            for(int p=0;p<context.P;p++){
+                for(int i=0;i<context.Z;i++){
+                    sectorMenace.get(p).get(i).clear();
+                }
             }
-           sectorRessource.clear();
-           etaressourceEta.clear();
            
            // parcours bots et sector           
            for(int z=0;z<context.Z;z++){
@@ -747,30 +751,31 @@ public static class L3_FirstBot {
                        if(etapes <=2) etan=0;
                        
                        if(etan <maxEtaCalc){
-                           if(p==context.ID){
-                               sectorRessource.add(dr);
-                               etaressourceEta.add(etapes);
-                           }else{
-                               sectorMenace.get(z).add(new Menace(dr,etan));
-                           }
+                               sectorMenace.get(p).get(z).add(new Menace(dr,etan));
                        }
                    }
                
                }
                
            }
-           for(int i=0;i<sectorMenace.size();i++){
-                Collections.sort(sectorMenace.get(i));
-                if(debugPlanner){
-                    System.err.println("Zone "+i+" eta "+sectorMenace.get(i));
-                }                
+           for(int p=0;p<context.P;p++){
+                for(int i=0;i<sectorMenace.size();i++){
+                     Collections.sort(sectorMenace.get(p).get(i));
+                     if(debugPlanner){
+                         System.err.println("p "+p+" Zone "+i+" eta "+sectorMenace.get(i));                     
+                     }    
+                    if(debugPlanner){
+                    System.err.println();    
+                    }
+                }
            }
+      
         }// CalcMenace
         
         public int etaForMenaceLevel(Zone zr,int nbDroneEnemy){
             int[][] nbThreatPerEta=new int[context.P][maxEtaCalc];
             
-            List<Menace> menDr=sectorMenace.get(zr.id);
+            List<Menace> menDr=sectorMenace.get(0).get(zr.id);
             for(int i=0;i<menDr.size();i++){
                 Drone dr=menDr.get(i).d;
                 nbThreatPerEta[dr.owner][menDr.get(i).eta]++;             
@@ -801,12 +806,12 @@ public static class L3_FirstBot {
             
             {
             int i=0;
-                for(Menace d : sectorMenace.get(zr.id)){
-                    if(d.eta<10){
-                        countP[d.d.owner]++;
-                    }
+                //for(Menace d : sectorMenace.get(zr.id)){
+                    //if(d.eta<10){
+                    //    countP[d.d.owner]++;
+                    //}
                     i++;
-                }
+                //}
             }
             
             int max=-1;
@@ -824,7 +829,7 @@ public static class L3_FirstBot {
             for(Zone zr : context.zones){
                 if(zr.owner!=context.ID) continue;
                     int szMen=calcMenace(zr);                
-                    int count=sectorRessource.size();
+                    int count=sectorMenace.get(context.ID).get(zr.id).size();
 
                 
                 
@@ -1010,10 +1015,6 @@ public static class L3_FirstBot {
     }    
     
 }
-
-
-
-
 
 
 
