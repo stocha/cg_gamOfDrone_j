@@ -139,7 +139,6 @@ class Player {
 }
 
 
-
 public static class L1_BaseBotLib {
     
     private static boolean debug_base=true;
@@ -473,7 +472,6 @@ public static class L1_BaseBotLib {
         }
 
         public void writeOrders(PrintStream out) {
-            doPrepareOrder();
 
             for (int d = 0; d < D; d++) {
                 out.println("" + _orders[d].x + " " + _orders[d].y);
@@ -484,6 +482,7 @@ public static class L1_BaseBotLib {
 
     }
 }
+
 
 
 
