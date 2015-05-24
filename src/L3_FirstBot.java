@@ -276,11 +276,20 @@ public class L3_FirstBot {
                        
                        int etapes=zo.coucheLevel(dr);
                        int etan=zo.headingLevel(dr);
-                       if(etapes <=2) etan=0;
                        
-                       if(etan <maxEtaCalc){
-                               sectorMenace.get(p).get(z).add(new Menace(dr,etan));
+                       if(p!=context.ID){
+                            etan-=1;
+                            if(etapes <=4) etan=etapes-1;
+                            if(etan<0) etan=0;
+
+                            if(etan <maxEtaCalc){
+                                    sectorMenace.get(p).get(z).add(new Menace(dr,etan));
+                            }
                        }
+                       else{
+                           // Friendly forces
+                                sectorMenace.get(p).get(z).add(new Menace(dr,etapes));
+                        }
                    }
                
                }
