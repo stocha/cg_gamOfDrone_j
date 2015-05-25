@@ -105,6 +105,12 @@ public class L3_b_SecondBot {
                 boolean done = false;
                 int lived = 0;
                 int life = 1;
+                
+                Zone goalZoneOurs=null;
+                
+                void setGoalZone(Zone theGoal){
+                    this.goalZoneOurs=theGoal;
+                }
 
                 SimpleMissions(L0_GraphicLib2d.WithCoord cible, int life) {
                     this.life = life;
@@ -128,11 +134,19 @@ public class L3_b_SecondBot {
                 }
 
                 boolean releaseRessource() {
+                    
+                    if(goalZoneOurs!=null){
+                        if(goalZoneOurs.owner==ID){
+                            lived=life;
+                        }
+                    }
+                    
                     if (lived >= life) {
                         done = true;
                     } else {
                         return false;
                     }
+                    
 
                     if (assignedResource.isEmpty()) {
                         return true;
@@ -478,6 +492,7 @@ public class L3_b_SecondBot {
                         }
                 }
                 
+                
 
 
             }
@@ -505,10 +520,14 @@ public class L3_b_SecondBot {
 
                     if (friendly.size() > 0) {
                         Zone closestToT = L0_GraphicLib2d.closestFrom(s.b, friendly);
-                        if (closestToT.cord.distance(s.b.cord) < (L1_BaseBotLib.lvl0Dist - 5) * 2) {
-                            Point p = L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, L1_BaseBotLib.lvl0Dist - 5);
+                        double distToW=closestToT.cord.distance(s.b.cord);
+                        if (closestToT.cord.distance(s.b.cord) > (L1_BaseBotLib.lvl0Dist - 5) * 2) {
+                            Point p = L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, distToW-L1_BaseBotLib.lvl0Dist *2);
                             prio = new L1_BaseBotLib.GamePos();
                             prio.set(p);
+                        }else{
+                            prio = new L1_BaseBotLib.GamePos();
+                            prio.set(closestToT.cord());
                         }
                     }
 

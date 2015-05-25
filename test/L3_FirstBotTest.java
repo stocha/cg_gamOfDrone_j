@@ -2,6 +2,19 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
+
+
+// Pour anticipation trajectoire sur ressources attaques
+nbZones=4
+nbDrones=5
+gameSeed=1432573070715
+
+nbZones=4
+nbDrones=11
+gameSeed=1432573664773
+
+/////////
+
  */
 
 import java.io.ByteArrayInputStream;

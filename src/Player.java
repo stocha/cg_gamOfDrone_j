@@ -530,7 +530,6 @@ public static class L1_BaseBotLib {
 
 
 
-
 public static class L3_b_SecondBot {
 
     static boolean debugPlanner_calcMenace = false;
@@ -615,6 +614,12 @@ public static class L3_b_SecondBot {
                 boolean done = false;
                 int lived = 0;
                 int life = 1;
+                
+                Zone goalZoneOurs=null;
+                
+                void setGoalZone(Zone theGoal){
+                    this.goalZoneOurs=theGoal;
+                }
 
                 SimpleMissions(L0_GraphicLib2d.WithCoord cible, int life) {
                     this.life = life;
@@ -638,11 +643,19 @@ public static class L3_b_SecondBot {
                 }
 
                 boolean releaseRessource() {
+                    
+                    if(goalZoneOurs!=null){
+                        if(goalZoneOurs.owner==ID){
+                            lived=life;
+                        }
+                    }
+                    
                     if (lived >= life) {
                         done = true;
                     } else {
                         return false;
                     }
+                    
 
                     if (assignedResource.isEmpty()) {
                         return true;
@@ -967,22 +980,23 @@ public static class L3_b_SecondBot {
                     SectorHyp h=sh[z];
                     
                     int fV=h.attackByUsFirstVictory();
-                    if(zones.get(z).id==ID){
-                        firstVict[z]=6666;
+                    if(zones.get(z).owner==ID){
+                        firstVict[z]=666;
                     }else{
-                        if(fV<0) firstVict[z]=1111;else
+                        if(fV<0) firstVict[z]=1000;else
                             firstVict[z]=fV;                        
                     }                    
                 }
 
                 for(int i=0;i<firstVict.length;i++){
-                    System.err.print("|"+firstVict[i]);
+                    System.err.print(""+firstVict[i]);
                 }
                 System.err.println(" Vict");
                 int fZ=findMin(firstVict);
                 if(firstVict[fZ] <99){
                         SimpleMissions mi = new SimpleMissions(zones.get(fZ), Math.max(firstVict[fZ]+1,5));
                         mission.add(mi);
+                        mi.setGoalZone(zones.get(fZ));
                         for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
                             mi.addDrone(d);
                         }
@@ -1015,10 +1029,14 @@ public static class L3_b_SecondBot {
 
                     if (friendly.size() > 0) {
                         Zone closestToT = L0_GraphicLib2d.closestFrom(s.b, friendly);
-                        if (closestToT.cord.distance(s.b.cord) < (L1_BaseBotLib.lvl0Dist - 5) * 2) {
-                            Point p = L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, L1_BaseBotLib.lvl0Dist - 5);
+                        double distToW=closestToT.cord.distance(s.b.cord);
+                        if (closestToT.cord.distance(s.b.cord) > (L1_BaseBotLib.lvl0Dist - 5) * 2) {
+                            Point p = L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, distToW-L1_BaseBotLib.lvl0Dist *2);
                             prio = new L1_BaseBotLib.GamePos();
                             prio.set(p);
+                        }else{
+                            prio = new L1_BaseBotLib.GamePos();
+                            prio.set(s.b.cord());
                         }
                     }
 
@@ -1073,6 +1091,7 @@ public static class L3_b_SecondBot {
                     }
 
                     SimpleMissions mi = new SimpleMissions(s.b, (int) (Math.sqrt(s.distSq) / (L1_BaseBotLib.lvl0Dist - 1)) + 1);
+                    mi.setGoalZone(s.b);
                     mission.add(mi);
                     mi.addDrone(s.a);
                     planed.add(s.a);
