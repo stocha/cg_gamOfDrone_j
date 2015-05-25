@@ -181,6 +181,10 @@ public class L3_FirstBot {
             int lived = 0;
             int life = 1;
 
+            SimpleMissions(L0_GraphicLib2d.WithCoord cible,int life) {
+                this.life=life;
+                missionTarget = cible;
+            }            
             SimpleMissions(L0_GraphicLib2d.WithCoord cible) {
                 missionTarget = cible;
             }
@@ -384,7 +388,7 @@ public class L3_FirstBot {
             List<Zone> ene = new ArrayList<>(context.Z);
 
             for (Zone zr : context.zones) {
-                if (zr.owner == context.ID) {
+                if (zr.owner == context.ID ||(zr.owner==-1 && context.P==2)) {
                     mine.add(zr);
                 } else {
                     ene.add(zr);
@@ -437,30 +441,28 @@ public class L3_FirstBot {
   
 
                     Zone z = L0_GraphicLib2d.closestFrom(gp, toTry);
-                    List<Drone> closeOnes=new ArrayList<>();
-                    int szl=this.sectorResource.get(z.id).size();
-                    for(int i=0;i<szl && i<(context.D / 2 )+1 ;i++){
-                        closeOnes.add(sectorResource.get(z.id).get(i).d);
-                    }
-                    
-                    cc = L0_GraphicLib2d.baryCenter(closeOnes);
-                    L1_BaseBotLib.GamePos myCenter = new L1_BaseBotLib.GamePos();
-                    myCenter.cord.setLocation(cc);                      
-                    
-                    double d = z.cord.distance(myCenter.cord);
-                    int TT = (int) (d / L1_BaseBotLib.lvl0Dist);
-                    TT += 3;
+                    int eta=0;
+                    for(int t=0;t<context.D / 2 -1;t++){
+                        eta=sectorResource.get(z.id).get(t).eta;
+                        int men = maxMenaceAtZForTime(z.id, eta);
+                        if(men<t+1){
+                        int TT = eta;
 
-                    int men = maxMenaceAtZForTime(z.id, TT);
-                    if (men <= context.D / 2) {
-                        SimpleMissions mi = new SimpleMissions(toTry.get(0));
-                        mission.add(mi);
-                        List<Drone> sent = new ArrayList<>();
-                        sent.addAll(context.freeDrone);
-                        for (int i = 0; i < sent.size(); i++) {
-                            mi.addDrone(sent.get(i));
+
+                            SimpleMissions mi = new SimpleMissions(z,eta+1);
+                            mission.add(mi);
+                            List<Drone> sent = new ArrayList<>();
+                            sent.addAll(context.freeDrone);
+                            for (int i = 0; i < sent.size() && i<t+1; i++) {
+                                mi.addDrone(sent.get(i));
+                            }
+                         
+                            
+                            break;
                         }
                     }
+                    
+
                     toTry.remove(z);
                 }
             }

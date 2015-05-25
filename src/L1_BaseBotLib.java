@@ -98,7 +98,7 @@ public class L1_BaseBotLib {
         
         public int coucheLevel(L0_GraphicLib2d.WithCoord cc){
             double dd = this.cord.distance(cc.cord());
-            return (int)dd/lvl0Dist;
+            return (int)(dd/lvl0Dist);
         }
         
         public int headingSpeed(DroneBase cc){

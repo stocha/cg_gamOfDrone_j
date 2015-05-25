@@ -19,6 +19,48 @@ public class L0_GraphicLib2d {
     public interface WithCoord{
         Point cord();
     }
+    
+    public static class  Tuple<T extends WithCoord> implements Comparable<Tuple>{ 
+        final T a;
+        final T b;
+        final double distSq;
+
+        public Tuple(T a, T b) {
+            this.a = a;
+            this.b = b;
+            
+            distSq=a.cord().distanceSq(b.cord());
+            
+        }
+
+        @Override
+        public int compareTo(Tuple t) {
+            return (int)(this.distSq-t.distSq);
+        }
+
+        @Override
+        public String toString() {
+            return "Tuple{" + "a" + a.cord().x+","+a.cord().y+"|b"+ b.cord().x+","+b.cord().y+" dist=" + distSq + '}';
+        }
+        
+        
+        
+        
+    }
+    
+    public static <T extends WithCoord> List<Tuple<T>> lowestCoupleDist(List<T> X, List<T> Y){
+        List<Tuple<T>> res=new ArrayList<>(X.size()*Y.size());
+        for(int i=0;i<X.size();i++){
+            for(int j=0;j<X.size();j++){
+                res.add(new Tuple(X.get(i),Y.get(j)));
+            }        
+        }
+        
+        Collections.sort(res);
+        
+        return res;
+    
+    }
 
     
     public static < T extends WithCoord> T farthestFrom(WithCoord cc,List<T> them){

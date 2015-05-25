@@ -48,27 +48,28 @@ public class L3_FirstBotTest {
     public void testBot(){
         
         String init="";
-        init+="2 0 1 1\n"; // P I D Z
+        init+="2 0 1 2\n"; // P I D Z
         init+="3 3\n"; // Z CENTER X Y
+        init+="2 6\n"; // Z CENTER X Y
         
-        init+="-1 \n"; // Control
+        init+="-1 -1\n"; // Control
         init+="1 1\n"; // Z CENTER X Y
         
-        init+="-1 \n"; // control turn 1
+        init+="-1 -1\n"; // control turn 1
         init+="1 1\n"; // turn 1 p1 b CENTER X Y         
         
-        init+="-1 \n"; // control turn 1
+        init+="-1 -1\n"; // control turn 1
         init+="1 1\n"; // turn 1 p1 b CENTER X Y          
         
-        init+="-1 \n"; // control turn 1
+        init+="-1 -1\n"; // control turn 1
         init+="1 1\n"; // turn 1 p1 b CENTER X Y         
         
-        init+="-1 \n"; // control turn 1
+        init+="-1 -1\n"; // control turn 1
         init+="1 1\n"; // turn 1 p1 b CENTER X Y           
         
         
         InputStream stream = new ByteArrayInputStream(init.getBytes(StandardCharsets.UTF_8));
-        L3_FirstBot.Bot b=new L3_FirstBot.Bot(stream);
+        L1_BaseBotLib.BotBase b=new L3_b_SecondBot.Bot(stream);
         
         b.readTurn();
         b.doPrepareOrder();

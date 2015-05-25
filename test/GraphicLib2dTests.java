@@ -87,11 +87,29 @@ public class GraphicLib2dTests {
         
         tos.add(new P(-1,1));
         Assert.assertEquals("Closest elem [java.awt.Point[x=-1,y=0], java.awt.Point[x=-1,y=1]]","Closest elem "+L0_GraphicLib2d.clothestElements( tos));
-        Assert.assertEquals("Farthest elem [java.awt.Point[x=2,y=0], java.awt.Point[x=-1,y=1]]","Farthest elem "+L0_GraphicLib2d.farthestElements(tos));
+        Assert.assertEquals("Farthest elem [java.awt.Point[x=-1,y=1], java.awt.Point[x=2,y=0]]","Farthest elem "+L0_GraphicLib2d.farthestElements(tos));
         
         //System.out.println();
         
     
+    }
+    
+    @Test
+    public void testTupleDistanceCouple(){
+        List<P> A=new ArrayList<>();
+        List<P> B=new ArrayList<>();
+        
+        A.add(new P(0,0));
+        A.add(new P(1,0));
+        A.add(new P(2,0));
+        
+        B.add(new P(0,1));
+        B.add(new P(1,1));
+        B.add(new P(2,1));      
+        
+        List<L0_GraphicLib2d.Tuple<P>> res=L0_GraphicLib2d.lowestCoupleDist(A, B);
+        System.out.println(""+res);
+        
     }
     
     @Test
