@@ -358,16 +358,40 @@ public class L3_b_SecondBot {
             List<Drone> planed=new ArrayList<>(D);
             List<Drone> marked=new ArrayList<>(D);
             
+            List<Zone> friendly=new ArrayList<>(D);
+            friendly.addAll(zones);
+            
             for(L0_GraphicLib2d.Tuple<Drone,Drone> s :  dist){
                 if(!freeDrone.contains(s.a)) continue;
                 if(planed.contains(s.a)) continue;
                 if(marked.contains(s.b)) continue;
                 
-                SimpleMissions mi=new SimpleMissions(s.b, 1);
-                mission.add(mi);    
-                mi.addDrone(s.a);            
-                planed.add(s.a);
-                marked.add(s.b);
+                L1_BaseBotLib.GamePos prio=null;
+                
+                if(friendly.size()>0){                    
+                    Zone closestToT=L0_GraphicLib2d.closestFrom(s.b,friendly );
+                    if(closestToT.cord.distance(s.b.cord) < (L1_BaseBotLib.lvl0Dist-5)*2){
+                        Point p=L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, L1_BaseBotLib.lvl0Dist-5);
+                        prio=new L1_BaseBotLib.GamePos();
+                        prio.set(p);
+                    }
+                }
+                
+                if(prio!=null){
+                    // NearPlanet Friend
+                    SimpleMissions mi=new SimpleMissions(prio, 1);
+                    mission.add(mi);    
+                    mi.addDrone(s.a);            
+                    planed.add(s.a);
+                    marked.add(s.b);
+                }
+                else{
+                    SimpleMissions mi=new SimpleMissions(s.b, 1);
+                    mission.add(mi);    
+                    mi.addDrone(s.a);            
+                    planed.add(s.a);
+                    marked.add(s.b);
+                }                    
             }            
         }
         
