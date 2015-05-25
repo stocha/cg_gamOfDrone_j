@@ -382,7 +382,19 @@ public class L3_b_SecondBot {
                     return ""+core + "\n en=" + en + "\n fr=" + fr + ", nbTurnsPlan=" + nbTurnsPlan + '}';
                 }
                 
-                
+                public int attackByUsFirstVictory(){
+                    int res=-1;
+                    
+                    for(int i=0;i<nbTurnsPlan;i++){
+                        if(en.get(i).size()<fr.get(i).size()){
+                            return i;
+                        }
+                    }
+                    
+                    return res;
+                    
+                }
+                             
 
                 SectorHyp(Zone core, List<L0_GraphicLib2d.Tuple<Drone, Zone>> frienCl, List<L0_GraphicLib2d.Tuple<Drone, Zone>> eneCl) {
                     for (int i = 0; i < nbTurnsPlan; i++) {
@@ -416,19 +428,51 @@ public class L3_b_SecondBot {
                 }
 
             }
+            
+            private int findMin(int[] it){
+                int min=Integer.MAX_VALUE;
+                int ind=-1;
+                
+                for(int i=0;i<it.length;i++){
+                    if(min> it[i]){ min=it[i]; ind=i;}
+                }
+                
+                return ind;
+            
+            }
 
             public void attackDefPlaning() {
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> friendDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> enDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
-
-                Drone[] hypDef = new Drone[200];
-                Drone[] hypAtt = new Drone[200];
+                if(freeDrone.isEmpty()) return;
+                
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> friendDist = L0_GraphicLib2d.lowestCoupleDist(freeDrone, zones);
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> enDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID^1), zones);
+                
+                int[] firstVict=new int[Z];
                 
                 SectorHyp sh[]=new SectorHyp[Z];
-                for(int i=0;i<Z;i++){
-                    sh[i]=new SectorHyp(zones.get(i), friendDist, enDist);
-                    System.err.println(""+sh[i]);
+                for(int z=0;z<Z;z++){
+                    sh[z]=new SectorHyp(zones.get(z), friendDist, enDist);
+                    //System.err.println(""+sh[i]);
+                    
+                    SectorHyp h=sh[z];
+                    
+                    int fV=h.attackByUsFirstVictory();
+                    if(zones.get(z).id==ID){
+                        firstVict[z]=1000;
+                    }else{
+                        if(fV<0) firstVict[z]=1000;else
+                            firstVict[z]=fV;                        
+                    }                    
                 }
+
+                for(int i=0;i<firstVict.length;i++){
+                    System.err.print(""+firstVict[i]);
+                }
+                System.err.println(" Vict");
+                int fZ=findMin(firstVict);
+                
+                
+
 
             }
 

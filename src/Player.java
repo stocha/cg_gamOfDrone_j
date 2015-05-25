@@ -911,17 +911,17 @@ public static class L3_b_SecondBot {
 
                     for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filEne) {
                         double tA = (Math.sqrt(t.distSq) - L1_BaseBotLib.lvl0Dist) / L1_BaseBotLib.lvl0Dist;
-                        int ta = (int) Math.min(0, tA);
+                        int ta = (int)Math.max(0, tA);
                         for(int i=ta;i<nbTurnsPlan;i++){
                             en.get(i).add(t.a);
                         }
                     }
                     
-                    for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filEne) {
+                    for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filfriend) {
                         double tA = (Math.sqrt(t.distSq) + 3) / L1_BaseBotLib.lvl0Dist;
-                        int ta = (int) Math.min(0, tA);
+                        int ta = (int)Math.max(0, tA);
                         for(int i=ta;i<nbTurnsPlan;i++){
-                            en.get(i).add(t.a);
+                            fr.get(i).add(t.a);
                         }
                     }                    
                 }
@@ -1103,7 +1103,6 @@ public static class L3_b_SecondBot {
     }
 
 }
-
 
 
 
