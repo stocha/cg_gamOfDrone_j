@@ -425,7 +425,14 @@ public class L3_b_SecondBot {
                     this.core = core;
 
                     for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filEne) {
-                        double tA = (Math.sqrt(t.distSq) - L1_BaseBotLib.lvl0Dist) / L1_BaseBotLib.lvl0Dist;
+                        double tA;
+                        double pureDist=Math.sqrt(t.distSq);
+                        
+                        if(pureDist < L1_BaseBotLib.lvl0Dist*3)
+                            tA= (Math.sqrt(t.distSq) - L1_BaseBotLib.lvl0Dist) / L1_BaseBotLib.lvl0Dist;
+                        else{
+                            tA = t.b.headingLevel(t.a);
+                        }
                         int ta = (int)Math.max(0, tA);
                         for(int i=ta;i<nbTurnsPlan;i++){
                             en.get(i).add(t.a);
@@ -485,11 +492,16 @@ public class L3_b_SecondBot {
                 System.err.println(" Vict");
                 int fZ=findMin(firstVict);
                 if(firstVict[fZ] <99){
-                        SimpleMissions mi = new SimpleMissions(zones.get(fZ), Math.max(firstVict[fZ]+1,5));
+                    // Attacke potentiel
+                    final int botPerSector=(int)Math.max(1, (int)(avg_dronePerZone+1));
+                    int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
+                    if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
+                        SimpleMissions mi = new SimpleMissions(zones.get(fZ), 3);
                         mission.add(mi);
                         for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
                             mi.addDrone(d);
                         }
+                    }
                 }
                 
                 
@@ -582,6 +594,7 @@ public class L3_b_SecondBot {
                     }
 
                     SimpleMissions mi = new SimpleMissions(s.b, (int) (Math.sqrt(s.distSq) / (L1_BaseBotLib.lvl0Dist - 1)) + 1);
+                    mi.setGoalZone(s.b);
                     mission.add(mi);
                     mi.addDrone(s.a);
                     planed.add(s.a);
