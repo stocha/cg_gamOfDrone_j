@@ -457,8 +457,8 @@ public class L3_b_SecondBot {
                     SectorHyp h=sh[z];
                     
                     int fV=h.attackByUsFirstVictory();
-                    if(zones.get(z).id==ID){
-                        firstVict[z]=1000;
+                    if(zones.get(z).owner==ID){
+                        firstVict[z]=666;
                     }else{
                         if(fV<0) firstVict[z]=1000;else
                             firstVict[z]=fV;                        
@@ -470,7 +470,13 @@ public class L3_b_SecondBot {
                 }
                 System.err.println(" Vict");
                 int fZ=findMin(firstVict);
-                
+                if(firstVict[fZ] <99){
+                        SimpleMissions mi = new SimpleMissions(zones.get(fZ), Math.max(firstVict[fZ]+1,5));
+                        mission.add(mi);
+                        for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
+                            mi.addDrone(d);
+                        }
+                }
                 
 
 
