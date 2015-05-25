@@ -27,6 +27,11 @@ public class L3_b_SecondBot {
 
     public static class Drone extends L1_BaseBotLib.DroneBase implements L0_GraphicLib2d.WithCoord {
 
+        @Override
+        public String toString() {
+            return "{" +this.owner+"/"+this.id+ '}';
+        }
+        
     }
 
     public static class Zone extends L1_BaseBotLib.ZoneBase {
@@ -395,16 +400,16 @@ public class L3_b_SecondBot {
 
                     for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filEne) {
                         double tA = (Math.sqrt(t.distSq) - L1_BaseBotLib.lvl0Dist) / L1_BaseBotLib.lvl0Dist;
-                        int ta = (int) tA;
-                        for(int i=0;i<ta+1;i++){
+                        int ta = (int)Math.max(0, tA);
+                        for(int i=ta;i<nbTurnsPlan;i++){
                             en.get(i).add(t.a);
                         }
                     }
                     
-                    for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filEne) {
+                    for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filfriend) {
                         double tA = (Math.sqrt(t.distSq) + 3) / L1_BaseBotLib.lvl0Dist;
-                        int ta = (int) tA;
-                        for(int i=0;i<ta+1;i++){
+                        int ta = (int)Math.max(0, tA);
+                        for(int i=ta;i<nbTurnsPlan;i++){
                             fr.get(i).add(t.a);
                         }
                     }                    
@@ -569,6 +574,8 @@ public class L3_b_SecondBot {
         Drone newdrone() {
             return new Drone() {
             };
+            
+            
         }
 
         @Override
