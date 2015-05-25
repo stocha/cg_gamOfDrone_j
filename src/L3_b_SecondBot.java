@@ -109,6 +109,8 @@ public class L3_b_SecondBot {
                 Zone goalZoneOurs=null;
                 
                 void setGoalZone(Zone theGoal){
+                    if(targetZoneAttacks.contains(theGoal)) throw new RuntimeException("Impossible");
+                    targetZoneAttacks.add(theGoal);
                     this.goalZoneOurs=theGoal;
                 }
 
@@ -155,6 +157,9 @@ public class L3_b_SecondBot {
                     freeDrone.addAll(assignedResource);
                     assignedResource.clear();
                     done = true;
+                    if(goalZoneOurs!=null){
+                        targetZoneAttacks.remove(goalZoneOurs);
+                    }
 
                     return done;
                 }
@@ -165,6 +170,7 @@ public class L3_b_SecondBot {
             private final List<List<Menace>> sectorResource; // player // zone // drone
 
             private final List<SimpleMissions> mission = new ArrayList<>(40);
+            private final List<Zone> targetZoneAttacks = new ArrayList<>(40);
 
             public AttackDefPlanner() {
 
@@ -487,7 +493,7 @@ public class L3_b_SecondBot {
                 }
 
                 for(int i=0;i<firstVict.length;i++){
-                    System.err.print(""+firstVict[i]);
+                    System.err.print("|"+firstVict[i]);
                 }
                 System.err.println(" Vict");
                 int fZ=findMin(firstVict);
