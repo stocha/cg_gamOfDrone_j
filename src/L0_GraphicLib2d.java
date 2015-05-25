@@ -20,12 +20,12 @@ public class L0_GraphicLib2d {
         Point cord();
     }
     
-    public static class  Tuple<T extends WithCoord> implements Comparable<Tuple>{ 
-        final T a;
-        final T b;
+    public static class  Tuple<T1 extends WithCoord,T2 extends WithCoord> implements Comparable<Tuple>{ 
+        final T1 a;
+        final T2 b;
         final double distSq;
 
-        public Tuple(T a, T b) {
+        public Tuple(T1 a, T2 b) {
             this.a = a;
             this.b = b;
             
@@ -48,10 +48,10 @@ public class L0_GraphicLib2d {
         
     }
     
-    public static <T extends WithCoord> List<Tuple<T>> lowestCoupleDist(List<T> X, List<T> Y){
-        List<Tuple<T>> res=new ArrayList<>(X.size()*Y.size());
+    public static <T1 extends WithCoord,T2 extends WithCoord> List<Tuple<T1,T2>> lowestCoupleDist(List<T1> X, List<T2> Y){
+        List<Tuple<T1,T2>> res=new ArrayList<>(X.size()*Y.size());
         for(int i=0;i<X.size();i++){
-            for(int j=0;j<X.size();j++){
+            for(int j=0;j<Y.size();j++){
                 res.add(new Tuple(X.get(i),Y.get(j)));
             }        
         }

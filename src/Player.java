@@ -23,10 +23,53 @@ import java.util.Scanner;
  */
 class Player {
 
+    
     public static class L0_GraphicLib2d {
     
     public interface WithCoord{
         Point cord();
+    }
+    
+    public static class  Tuple<T1 extends WithCoord,T2 extends WithCoord> implements Comparable<Tuple>{ 
+        final T1 a;
+        final T2 b;
+        final double distSq;
+
+        public Tuple(T1 a, T2 b) {
+            this.a = a;
+            this.b = b;
+            
+            distSq=a.cord().distanceSq(b.cord());
+            
+        }
+
+        @Override
+        public int compareTo(Tuple t) {
+            return (int)(this.distSq-t.distSq);
+        }
+
+        @Override
+        public String toString() {
+            return "Tuple{" + "a" + a.cord().x+","+a.cord().y+"|b"+ b.cord().x+","+b.cord().y+" dist=" + distSq + '}';
+        }
+        
+        
+        
+        
+    }
+    
+    public static <T1 extends WithCoord,T2 extends WithCoord> List<Tuple<T1,T2>> lowestCoupleDist(List<T1> X, List<T2> Y){
+        List<Tuple<T1,T2>> res=new ArrayList<>(X.size()*Y.size());
+        for(int i=0;i<X.size();i++){
+            for(int j=0;j<Y.size();j++){
+                res.add(new Tuple(X.get(i),Y.get(j)));
+            }        
+        }
+        
+        Collections.sort(res);
+        
+        return res;
+    
     }
 
     
@@ -137,6 +180,7 @@ class Player {
     }     
     
 }
+
 
 
 public static class L1_BaseBotLib {
@@ -484,13 +528,6 @@ public static class L1_BaseBotLib {
 }
 
 
-
-
-
-/**
- *
- * @author Jahan
- */
 public static class L3_b_SecondBot {
     
     static boolean debugPlanner_calcMenace=false;
@@ -743,6 +780,103 @@ public static class L3_b_SecondBot {
                 a.sendDrones();
             }
         }
+        
+        public void greedySuite(){
+            if(freeDrone.isEmpty()) return;
+            
+           final List<L0_GraphicLib2d.Tuple<Drone,Zone>> dist=L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
+            List<Drone> planed=new ArrayList<>(freeDrone.size());        
+            
+            int zoneCount[]=new int[Z];
+            
+            double maxDist=0;
+            for(L0_GraphicLib2d.Tuple<Drone,Zone> s :  dist){
+                if(planed.contains(s.a)) continue;
+                planed.add(s.a);
+                zoneCount[s.b.id]++;
+                
+                if(s.distSq>maxDist) maxDist=s.distSq;
+            }
+            
+            if(! (maxDist<=L1_BaseBotLib.lvl0Dist)) return;        
+            
+            List<Drone> atMostPopulated=new ArrayList<>();
+            int maxPop=0;
+            int locMax=0;
+            
+            for(int i=0;i<Z;i++){
+                if(locMax>zoneCount[i]){
+                    locMax=zoneCount[i];
+                    maxPop=i;
+                }
+            }
+            Zone maxWorld=zones.get(maxPop);
+            System.err.println("Max populated = "+maxWorld);
+            
+            for(L0_GraphicLib2d.Tuple<Drone,Zone> s :  dist){
+                if(s.distSq >= 50) break;
+                
+                if(s.b.id==maxWorld.id){
+                        atMostPopulated.add(s.a);
+                }
+            }
+            // --------------- Selected drones at MaxPop
+            System.err.println("Drones to expand "+atMostPopulated);
+            
+            List<Zone> otherZones=new ArrayList<>();
+            otherZones.addAll(zones);
+            otherZones.remove(maxWorld);
+            
+            double maxDistZ=0;
+            for(Zone ot: otherZones){
+                double dd=ot.cord.distance(maxWorld.cord);
+                if(dd>maxDistZ) maxDistZ=dd;                                
+            }
+            int TimeToLive=(int)maxDistZ/L1_BaseBotLib.lvl0Dist +1;
+            
+            while(!atMostPopulated.isEmpty())
+            for(Zone ot: otherZones){
+                Drone d = atMostPopulated.get(0);
+                SimpleMissions mi=new SimpleMissions(d, TimeToLive);
+                mission.add(mi);    
+                mi.addDrone(d);             
+                atMostPopulated.remove(d);
+            }            
+            
+            
+        }
+        
+        boolean once=true;
+        public void greedyPlaning(){
+            if(!once) return;
+            
+            final List<L0_GraphicLib2d.Tuple<Drone,Zone>> dist=L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
+            List<Drone> planed=new ArrayList<>(freeDrone.size());             
+            
+            double maxDist=0;
+            for(L0_GraphicLib2d.Tuple<Drone,Zone> s :  dist){
+                if(planed.contains(s.a)) continue;
+                planed.add(s.a);
+                
+                if(s.distSq>maxDist) maxDist=s.distSq;
+            }
+            
+            if(maxDist<=L1_BaseBotLib.lvl0Dist) once=false;
+            
+            
+            planed.clear();
+            for(L0_GraphicLib2d.Tuple<Drone,Zone> s :  dist){
+                if(planed.contains(s.a)) continue;
+                
+                SimpleMissions mi=new SimpleMissions(s.b, (int)(Math.sqrt(s.distSq)/(L1_BaseBotLib.lvl0Dist-1))+1);
+                mission.add(mi);    
+                mi.addDrone(s.a);            
+                planed.add(s.a);
+            }
+            
+            
+            
+        }
 
         public void plan() {
             pre_plan();
@@ -758,50 +892,8 @@ public static class L3_b_SecondBot {
                 }
             }
 
-            List<Zone> closestZ=L0_GraphicLib2d.clothestElements(zones);
-            L1_BaseBotLib.GamePos EmCenter=new L1_BaseBotLib.GamePos();
-            EmCenter.cord.setLocation(L0_GraphicLib2d.baryCenter(closestZ));
-            
-            List<Drone> drone=new ArrayList<>(40);
-            drone.addAll(freeDrone);
-            
-            int perm=0;     
-            while(freeDrone.size()>Math.max(0,D-4) ){
-                Zone cz=closestZ.get(perm);
-                Drone d=L0_GraphicLib2d.closestFrom(cz, freeDrone);
-                SimpleMissions mi=new SimpleMissions(cz, 1);
-                mi.addDrone(d);
-                mission.add(mi);
-                
-                perm^=1;
-            }
-            
-            if(freeDrone.size()>0){
-                L1_BaseBotLib.GamePos DCenter=new L1_BaseBotLib.GamePos();
-                DCenter.cord.setLocation(L0_GraphicLib2d.baryCenter(freeDrone));             
-                
-                if(!ene.isEmpty()){
-                    Zone z = L0_GraphicLib2d.closestFrom(DCenter, ene);
-                    drone.addAll(freeDrone);
-                    SimpleMissions mi=new SimpleMissions(z, 1);
-                    mission.add(mi);   
-                    for(Drone d :  drone){
-                        mi.addDrone(d);
-                    }                    
-                    
-                }else{
-                    drone.addAll(freeDrone);
-                    SimpleMissions mi=new SimpleMissions(DCenter, 1);
-                    mission.add(mi);   
-                    for(Drone d :  drone){
-
-                        mi.addDrone(d);
-  
-                    }
-                                                
-                }
-                
-            }
+            greedyPlaning();
+            greedySuite();
 
             if(debugPlanner_calcMenace)
                 System.err.println("Mission "+mission);
@@ -855,6 +947,8 @@ public static class L3_b_SecondBot {
     }
 
 }
+
+
 
 
 

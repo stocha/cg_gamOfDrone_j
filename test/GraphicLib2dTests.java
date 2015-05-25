@@ -105,9 +105,9 @@ public class GraphicLib2dTests {
         
         B.add(new P(0,1));
         B.add(new P(1,1));
-        B.add(new P(2,1));      
+              
         
-        List<L0_GraphicLib2d.Tuple<P>> res=L0_GraphicLib2d.lowestCoupleDist(A, B);
+        List<L0_GraphicLib2d.Tuple<P,P>> res=L0_GraphicLib2d.lowestCoupleDist(A, B);
         System.out.println(""+res);
         
     }
