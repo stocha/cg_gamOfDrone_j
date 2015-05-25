@@ -298,7 +298,7 @@ public class L3_b_SecondBot {
             int locMax=0;
             
             for(int i=0;i<Z;i++){
-                if(locMax>zoneCount[i]){
+                if(locMax<zoneCount[i]){
                     locMax=zoneCount[i];
                     maxPop=i;
                 }
