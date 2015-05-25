@@ -1,4 +1,5 @@
 
+import java.awt.Point;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -329,6 +330,10 @@ public class L3_b_SecondBot {
             
             for(Zone ot: otherZones){
                 Drone d = atMostPopulated.get(0);
+                
+                L1_BaseBotLib.GamePos gp=new L1_BaseBotLib.GamePos();
+                gp.set(new Point(2000,20));                
+                
                 SimpleMissions mi=new SimpleMissions(ot, TimeToLive);
                 mission.add(mi);    
                 mi.addDrone(d);             
@@ -348,9 +353,28 @@ public class L3_b_SecondBot {
             
         }
         
+        public void mirrorPlaning(){
+            final List<L0_GraphicLib2d.Tuple<Drone,Drone>> dist=L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), playerDrones.get(ID^1));
+            List<Drone> planed=new ArrayList<>(D);
+            List<Drone> marked=new ArrayList<>(D);
+            
+            for(L0_GraphicLib2d.Tuple<Drone,Drone> s :  dist){
+                if(!freeDrone.contains(s.a)) continue;
+                if(planed.contains(s.a)) continue;
+                if(marked.contains(s.b)) continue;
+                
+                SimpleMissions mi=new SimpleMissions(s.b, 1);
+                mission.add(mi);    
+                mi.addDrone(s.a);            
+                planed.add(s.a);
+                marked.add(s.b);
+            }            
+        }
+        
         boolean once=true;
         public void greedyPlaning(){
             if(!once) return;
+            once=false;
             
             final List<L0_GraphicLib2d.Tuple<Drone,Zone>> dist=L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
             List<Drone> planed=new ArrayList<>(freeDrone.size());             
@@ -395,7 +419,8 @@ public class L3_b_SecondBot {
             }
 
             greedyPlaning();
-            greedySuite();
+            //greedySuite();
+            mirrorPlaning();
 
             if(debugPlanner_calcMenace)
                 System.err.println("Mission "+mission);

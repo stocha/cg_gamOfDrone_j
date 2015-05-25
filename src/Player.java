@@ -527,7 +527,6 @@ public static class L1_BaseBotLib {
     }
 }
 
-
 public static class L3_b_SecondBot {
     
     static boolean debugPlanner_calcMenace=false;
@@ -805,7 +804,7 @@ public static class L3_b_SecondBot {
             int locMax=0;
             
             for(int i=0;i<Z;i++){
-                if(locMax>zoneCount[i]){
+                if(locMax<zoneCount[i]){
                     locMax=zoneCount[i];
                     maxPop=i;
                 }
@@ -834,16 +833,43 @@ public static class L3_b_SecondBot {
             }
             int TimeToLive=(int)maxDistZ/L1_BaseBotLib.lvl0Dist +1;
             
-            while(!atMostPopulated.isEmpty())
             for(Zone ot: otherZones){
                 Drone d = atMostPopulated.get(0);
-                SimpleMissions mi=new SimpleMissions(d, TimeToLive);
+                
+                L1_BaseBotLib.GamePos gp=new L1_BaseBotLib.GamePos();
+                gp.set(new Point(2000,20));                
+                
+                SimpleMissions mi=new SimpleMissions(ot, TimeToLive);
                 mission.add(mi);    
                 mi.addDrone(d);             
                 atMostPopulated.remove(d);
+                if(atMostPopulated.isEmpty()) break;
+            }        
+            
+            atMostPopulated.clear();
+            
+            atMostPopulated.addAll(freeDrone);
+                for(Drone ot: atMostPopulated){
+                    SimpleMissions mi=new SimpleMissions(ot, TimeToLive);
+                    mission.add(mi);    
+                    mi.addDrone(ot);             
+                }               
+            
+            
+        }
+        
+        public void mirrorPlaning(){
+            final List<L0_GraphicLib2d.Tuple<Drone,Drone>> dist=L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), playerDrones.get(ID^1));
+            List<Drone> planed=new ArrayList<>(freeDrone.size());
+            
+            for(L0_GraphicLib2d.Tuple<Drone,Drone> s :  dist){
+                if(planed.contains(s.a)) continue;
+                
+                SimpleMissions mi=new SimpleMissions(s.b, 1);
+                mission.add(mi);    
+                mi.addDrone(s.a);            
+                planed.add(s.a);
             }            
-            
-            
         }
         
         boolean once=true;
@@ -893,7 +919,8 @@ public static class L3_b_SecondBot {
             }
 
             greedyPlaning();
-            greedySuite();
+            //greedySuite();
+            mirrorPlaning();
 
             if(debugPlanner_calcMenace)
                 System.err.println("Mission "+mission);
@@ -947,6 +974,7 @@ public static class L3_b_SecondBot {
     }
 
 }
+
 
 
 
