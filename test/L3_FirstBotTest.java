@@ -4,6 +4,11 @@
  * and open the template in the editor.
 
 
+// ManWe
+nbZones=4
+nbDrones=11
+gameSeed=1432625517105
+
 // Pour anticipation trajectoire sur ressources attaques
 nbZones=4
 nbDrones=5

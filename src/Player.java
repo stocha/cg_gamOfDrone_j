@@ -653,10 +653,9 @@ public static class L3_b_SecondBot {
                 void setGoalZone(Zone theGoal,boolean unique){
                     if(assignedResource.size()>0) throw new RuntimeException();
                     if(unique && targetZoneAttacks.contains(theGoal)) done=true;
-                    targetZoneAttacks.add(theGoal);
                     this.goalZoneOurs=theGoal;
                     uniqueMission=unique;
-                    if(!done) targetZoneAttacks.add(theGoal);
+                    if(!done && unique) targetZoneAttacks.add(theGoal);
                 }
 
                 SimpleMissions(L0_GraphicLib2d.WithCoord cible, int life) {
@@ -1169,6 +1168,7 @@ public static class L3_b_SecondBot {
 
                 if (debugPlanner_mission) {
                     System.err.println("Mission " + mission);
+                    System.err.println("Unique "+targetZoneAttacks);
                 }
                 post_plan();
 
