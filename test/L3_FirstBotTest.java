@@ -9,6 +9,11 @@ nbZones=4
 nbDrones=11
 gameSeed=1432625517105
 
+nbZones=4
+nbDrones=9
+gameSeed=1432628322650
+--> test defense
+
 // Pour anticipation trajectoire sur ressources attaques
 nbZones=4
 nbDrones=5

@@ -533,43 +533,52 @@ public static class L1_BaseBotLib {
     }
 }
 
+
+
+
+
 public static class L3_b_SecondBot {
 
     static boolean debugPlanner_calcMenace = false;
     static boolean debugPlanner_mission = true;
-    
-            private static int findMin(int[] it){
-                int min=Integer.MAX_VALUE;
-                int ind=-1;
-                
-                for(int i=0;i<it.length;i++){
-                    if(min> it[i]){ min=it[i]; ind=i;}
-                }
-                
-                return ind;
-            
-            }  
-                       
-            
-            private static int findMax(int[] it){
-                int max=Integer.MIN_VALUE;
-                int ind=-1;
-                
-                for(int i=0;i<it.length;i++){
-                    if(max< it[i]){ max=it[i]; ind=i;}
-                }
-                
-                return ind;
-            
-            }            
+
+    private static int findMin(int[] it) {
+        int min = Integer.MAX_VALUE;
+        int ind = -1;
+
+        for (int i = 0; i < it.length; i++) {
+            if (min > it[i]) {
+                min = it[i];
+                ind = i;
+            }
+        }
+
+        return ind;
+
+    }
+
+    private static int findMax(int[] it) {
+        int max = Integer.MIN_VALUE;
+        int ind = -1;
+
+        for (int i = 0; i < it.length; i++) {
+            if (max < it[i]) {
+                max = it[i];
+                ind = i;
+            }
+        }
+
+        return ind;
+
+    }
 
     public static class Drone extends L1_BaseBotLib.DroneBase implements L0_GraphicLib2d.WithCoord {
 
         @Override
         public String toString() {
-            return "{" +this.owner+"/"+this.id+ '}';
+            return "{" + this.owner + "/" + this.id + '}';
         }
-        
+
     }
 
     public static class Zone extends L1_BaseBotLib.ZoneBase implements L0_GraphicLib2d.WithCoord {
@@ -579,12 +588,20 @@ public static class L3_b_SecondBot {
     }
 
     public static class Bot extends L1_BaseBotLib.BotBase<Drone, Zone, PlayerAnalysis> {
-        
+
         private final List<Zone> zonesRet;
-        private int Zret=0;
-        
+        private int Zret = 0;
 
         public class AttackDefPlanner {
+
+            private void createNewDefenseMi(int fZ, List<Drone> friends, List<Drone> foes) {
+                SimpleMissions mi = new SimpleMissions(zonesRet.get(fZ), 2);
+                mission.add(mi);
+                mi.setGoalZone(zonesRet.get(fZ), true);
+                for (Drone d : friends) {
+                    mi.addDrone(d);
+                }
+            }
 
             public class Menace implements Comparable<Menace> {
 
@@ -638,7 +655,7 @@ public static class L3_b_SecondBot {
 
                 @Override
                 public String toString() {
-                    return "{" + "\nR" + assignedResource + "\nT=" + missionTarget + "D:" + done +" U:"+uniqueMission+ '}';
+                    return "{" + "\nR" + assignedResource + "\nT=" + missionTarget + "D:" + done + " U:" + uniqueMission + '}';
                 }
 
                 List<Drone> assignedResource = new ArrayList<>(L1_BaseBotLib.maxDrones);
@@ -647,16 +664,22 @@ public static class L3_b_SecondBot {
                 boolean done = false;
                 int lived = 0;
                 int life = 1;
-                
-                Zone goalZoneOurs=null;
-                boolean uniqueMission=false;
-                
-                void setGoalZone(Zone theGoal,boolean unique){
-                    if(assignedResource.size()>0) throw new RuntimeException();
-                    if(unique && targetZoneAttacks.contains(theGoal)) done=true;
-                    this.goalZoneOurs=theGoal;
-                    uniqueMission=unique;
-                    if(!done && unique) targetZoneAttacks.add(theGoal);
+
+                Zone goalZoneOurs = null;
+                boolean uniqueMission = false;
+
+                void setGoalZone(Zone theGoal, boolean unique) {
+                    if (assignedResource.size() > 0) {
+                        throw new RuntimeException();
+                    }
+                    if (unique && targetZoneAttacks.contains(theGoal)) {
+                        done = true;
+                    }
+                    this.goalZoneOurs = theGoal;
+                    uniqueMission = unique;
+                    if (!done && unique) {
+                        targetZoneAttacks.add(theGoal);
+                    }
                 }
 
                 SimpleMissions(L0_GraphicLib2d.WithCoord cible, int life) {
@@ -669,13 +692,17 @@ public static class L3_b_SecondBot {
                 }
 
                 void addDrone(Drone d) {
-                    if(done) return;
+                    if (done) {
+                        return;
+                    }
                     assignedResource.add(d);
                     freeDrone.removeAll(assignedResource);
                 }
 
                 void sendDrones() {
-                    if(done) return;
+                    if (done) {
+                        return;
+                    }
                     for (Drone d : assignedResource) {
                         _orders[d.id].setLocation(missionTarget.cord());
                     }
@@ -683,20 +710,21 @@ public static class L3_b_SecondBot {
                 }
 
                 boolean releaseRessource() {
-                    if(done) return true;
-                    
-                    if(goalZoneOurs!=null){
-                        if(goalZoneOurs.owner==ID){
-                            lived=life;
+                    if (done) {
+                        return true;
+                    }
+
+                    if (goalZoneOurs != null) {
+                        if (goalZoneOurs.owner == ID) {
+                            lived = life;
                         }
                     }
-                    
+
                     if (lived >= life) {
                         done = true;
                     } else {
                         return false;
                     }
-                    
 
                     if (assignedResource.isEmpty()) {
                         return true;
@@ -705,7 +733,7 @@ public static class L3_b_SecondBot {
                     freeDrone.addAll(assignedResource);
                     assignedResource.clear();
                     done = true;
-                    if(uniqueMission && goalZoneOurs!=null){
+                    if (uniqueMission && goalZoneOurs != null) {
                         targetZoneAttacks.remove(goalZoneOurs);
                     }
 
@@ -947,35 +975,34 @@ public static class L3_b_SecondBot {
 
                 @Override
                 public String toString() {
-                    return ""+core + "\n en=" + en + "\n fr=" + fr + ", nbTurnsPlan=" + nbTurnsPlan + '}';
+                    return "" + core + "\n en=" + en + "\n fr=" + fr + ", nbTurnsPlan=" + nbTurnsPlan + '}';
                 }
-                
-                public int attackByUsFirstVictory(){
-                    int res=-1;
-                    
-                    for(int i=0;i<nbTurnsPlan;i++){
-                        if(en.get(i).size()<fr.get(i).size()){
+
+                public int attackByUsFirstVictory() {
+                    int res = -1;
+
+                    for (int i = 0; i < nbTurnsPlan; i++) {
+                        if (en.get(i).size() < fr.get(i).size()) {
                             return i;
                         }
                     }
-                    
+
                     return res;
-                    
+
                 }
-                
-                public int defByUsFirstVictory(){
-                    int res=-1;
-                    
-                    for(int i=0;i<nbTurnsPlan;i++){
-                        if(en.get(i).size()<=fr.get(i).size()){
-                            return i;
+
+                public int defByUsFirstVictory() {
+                    int res = -1;
+
+                    for (int i = 0; i < nbTurnsPlan; i++) {
+                        if (en.get(i).size() > fr.get(i).size()) {
+                            return i - 1;
                         }
                     }
-                    
+
                     return res;
-                    
-                }                
-                             
+
+                }
 
                 SectorHyp(Zone core, List<L0_GraphicLib2d.Tuple<Drone, Zone>> frienCl, List<L0_GraphicLib2d.Tuple<Drone, Zone>> eneCl) {
                     for (int i = 0; i < nbTurnsPlan; i++) {
@@ -993,108 +1020,117 @@ public static class L3_b_SecondBot {
 
                     for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filEne) {
                         double tA;
-                        double pureDist=Math.sqrt(t.distSq);
-                        
-                        if(pureDist < L1_BaseBotLib.lvl0Dist*3)
-                            tA= (Math.sqrt(t.distSq) - L1_BaseBotLib.lvl0Dist) / L1_BaseBotLib.lvl0Dist;
-                        else{
+                        double pureDist = Math.sqrt(t.distSq);
+
+                        if (pureDist < L1_BaseBotLib.lvl0Dist * 3) {
+                            tA = (Math.sqrt(t.distSq) - L1_BaseBotLib.lvl0Dist) / L1_BaseBotLib.lvl0Dist;
+                        } else {
                             tA = t.b.headingLevel(t.a);
                         }
-                        int ta = (int)Math.max(0, tA);
-                        for(int i=ta;i<nbTurnsPlan;i++){
+                        int ta = (int) Math.max(0, tA);
+                        for (int i = ta; i < nbTurnsPlan; i++) {
                             en.get(i).add(t.a);
                         }
                     }
-                    
+
                     for (L0_GraphicLib2d.Tuple<Drone, Zone> t : filfriend) {
                         double tA = (Math.sqrt(t.distSq) + 3) / L1_BaseBotLib.lvl0Dist;
-                        int ta = (int)Math.max(0, tA);
-                        for(int i=ta;i<nbTurnsPlan;i++){
+                        int ta = (int) Math.max(0, tA);
+                        for (int i = ta; i < nbTurnsPlan; i++) {
                             fr.get(i).add(t.a);
                         }
-                    }                    
+                    }
                 }
 
             }
-            
-            private int findMinNonUnique(int[] it){
-                int min=Integer.MAX_VALUE;
-                int ind=-1;
-                
-                for(int i=0;i<it.length;i++){
-                    if(targetZoneAttacks.contains(zonesRet.get(i))) continue;
-                    if(min> it[i]){ min=it[i]; ind=i;}
+
+            private int findMinNonUnique(int[] it) {
+                int min = Integer.MAX_VALUE;
+                int ind = -1;
+
+                for (int i = 0; i < it.length; i++) {
+                    if (targetZoneAttacks.contains(zonesRet.get(i))) {
+                        continue;
+                    }
+                    if (min > it[i]) {
+                        min = it[i];
+                        ind = i;
+                    }
                 }
-                
+
                 return ind;
-            
-            }             
-            
+
+            }
 
             public void attackDefPlaning() {
-                if(freeDrone.isEmpty()) return;
-                
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> friendDist = L0_GraphicLib2d.lowestCoupleDist(freeDrone, zonesRet);
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> enDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID^1), zonesRet);
-                
-                int[] firstVict=new int[Zret];
-                
-                SectorHyp sh[]=new SectorHyp[Zret];
-                for(int z=0;z<Zret;z++){
-                    sh[z]=new SectorHyp(zonesRet.get(z), friendDist, enDist);
-                    //System.err.println(""+sh[i]);
-                    
-                    SectorHyp h=sh[z];
-                    
-                    int fV=h.attackByUsFirstVictory();
-                    if(zonesRet.get(z).owner==ID){
-                        int fD=h.defByUsFirstVictory();
-                        if(true || fD<0)firstVict[z]=666; else
-                        {
-                            firstVict[z]=fD;  
-                        }
-                    }else{
-                        if(fV<0) firstVict[z]=1000;else
-                            firstVict[z]=fV;                        
-                    }                    
+                if (freeDrone.isEmpty()) {
+                    return;
                 }
 
-                if(debugPlanner_mission){
-                    for(int i=0;i<firstVict.length;i++){
-                        System.err.print("|"+firstVict[i]+"//");
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> friendDist = L0_GraphicLib2d.lowestCoupleDist(freeDrone, zonesRet);
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> enDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID ^ 1), zonesRet);
+
+                int[] firstVict = new int[Zret];
+
+                SectorHyp sh[] = new SectorHyp[Zret];
+                for (int z = 0; z < Zret; z++) {
+                    sh[z] = new SectorHyp(zonesRet.get(z), friendDist, enDist);
+                    //System.err.println(""+sh[i]);
+
+                    SectorHyp h = sh[z];
+
+                    int fV = h.attackByUsFirstVictory();
+                    if (zonesRet.get(z).owner == ID) {
+                        int fD = h.defByUsFirstVictory();
+                        if (fD < 0) {
+                            firstVict[z] = 666;
+                        } else {
+                            int nbToSuccess = sh[z].fr.get(fD).size(); // defense
+
+                            if (nbToSuccess > avg_dronePerLegitimateZone) {
+
+                                firstVict[z] = fD;
+                            } else {
+                                firstVict[z] = 666;
+                            }
+                        }
+                    } else {
+                        if (fV < 0) {
+                            firstVict[z] = 1000;
+                        } else {
+                            firstVict[z] = fV;
+                        }
+                    }
+                }
+
+                if (debugPlanner_mission) {
+                    for (int i = 0; i < firstVict.length; i++) {
+                        System.err.print("|" + firstVict[i] + "//");
                     }
                     System.err.println(" Vict_");
                 }
-                int fZ=findMinNonUnique(firstVict);
-                if(fZ==-1) return;
-                if(firstVict[fZ] <99 && zonesRet.get(fZ).owner!=ID){
+                int fZ = findMinNonUnique(firstVict);
+                if (fZ == -1) {
+                    return;
+                }
+                if (firstVict[fZ] < 99 && zonesRet.get(fZ).owner != ID) {
                     // Attacke potentiel
-                    final int botPerSector=100;//(int)Math.max(1, (int)(avg_dronePerZone+1));
-                    int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
-                    if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
+                    final int botPerSector = 100;//(int)Math.max(1, (int)(avg_dronePerZone+1));
+                    int nbToSuccess = sh[fZ].fr.get(firstVict[fZ]).size();
+                    if (nbToSuccess <= avg_dronePerLegitimateZone + 1) {
                         SimpleMissions mi = new SimpleMissions(zonesRet.get(fZ), 2);
                         mission.add(mi);
                         mi.setGoalZone(zonesRet.get(fZ), true);
-                        for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
+                        for (Drone d : sh[fZ].fr.get(firstVict[fZ])) {
                             mi.addDrone(d);
                         }
                     }
-                }else                if(firstVict[fZ] <99 && zonesRet.get(fZ).owner==ID){
-                    // Def potentiel
-                    final int botPerSector=(int)avg_dronePerLegitimateZone;//(int)Math.max(1, (int)(avg_dronePerZone+1));
-                    int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
-                    if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
-                        SimpleMissions mi = new SimpleMissions(zonesRet.get(fZ), 2);
-                        mission.add(mi);
-                        mi.setGoalZone(zonesRet.get(fZ), true);
-                        for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
-                            mi.addDrone(d);
-                        }
+                } else if (firstVict[fZ] < 99 && zonesRet.get(fZ).owner == ID) {
+                    // Def potentiel                    
+                    if (true) {
+                        createNewDefenseMi(fZ, sh[fZ].fr.get(firstVict[fZ]), sh[fZ].en.get(firstVict[fZ]));
                     }
                 }
-                
-                
-
 
             }
 
@@ -1121,12 +1157,12 @@ public static class L3_b_SecondBot {
 
                     if (friendly.size() > 0) {
                         Zone closestToT = L0_GraphicLib2d.closestFrom(s.b, friendly);
-                        double distToW=closestToT.cord.distance(s.b.cord);
+                        double distToW = closestToT.cord.distance(s.b.cord);
                         if (closestToT.cord.distance(s.b.cord) > (L1_BaseBotLib.lvl0Dist - 5) * 2) {
-                            Point p = L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, distToW-L1_BaseBotLib.lvl0Dist *2);
+                            Point p = L0_GraphicLib2d.SegABatDistFromA(closestToT, s.b, distToW - L1_BaseBotLib.lvl0Dist * 2);
                             prio = new L1_BaseBotLib.GamePos();
                             prio.set(p);
-                        }else{
+                        } else {
                             prio = new L1_BaseBotLib.GamePos();
                             prio.set(closestToT.cord());
                         }
@@ -1183,7 +1219,7 @@ public static class L3_b_SecondBot {
                     }
 
                     SimpleMissions mi = new SimpleMissions(s.b, (int) (Math.sqrt(s.distSq) / (L1_BaseBotLib.lvl0Dist - 1)) + 1);
-                    mi.setGoalZone(s.b,false);
+                    mi.setGoalZone(s.b, false);
                     mission.add(mi);
                     mi.addDrone(s.a);
                     planed.add(s.a);
@@ -1210,12 +1246,12 @@ public static class L3_b_SecondBot {
                 attackDefPlaning();
                 attackDefPlaning();
                 attackDefPlaning();
-                
-                //mirrorPlaning();
+
+                mirrorPlaning();
 
                 if (debugPlanner_mission) {
                     System.err.println("Mission " + mission);
-                    System.err.println("Unique "+targetZoneAttacks);
+                    System.err.println("Unique " + targetZoneAttacks);
                 }
                 post_plan();
 
@@ -1229,32 +1265,30 @@ public static class L3_b_SecondBot {
 
         public Bot(InputStream inst) {
             super(inst);
-            this.zonesRet=new ArrayList<>(Zret);
+            this.zonesRet = new ArrayList<>(Zret);
         }
 
         @Override
         protected void alloc() {
             super.alloc(); //To change body of generated methods, choose Tools | Templates.
             this.zonesRet.addAll(super.zones);
-            
-            List<L0_GraphicLib2d.Tuple<Zone,Zone>> di=L0_GraphicLib2d.lowestCoupleDist(zonesRet, zonesRet);
-            int distSum[]=new int[Z];
-            for(L0_GraphicLib2d.Tuple<Zone,Zone> t : di){
-                distSum[t.a.id]+=t.distSq;
-                distSum[t.b.id]+=t.distSq;
+
+            List<L0_GraphicLib2d.Tuple<Zone, Zone>> di = L0_GraphicLib2d.lowestCoupleDist(zonesRet, zonesRet);
+            int distSum[] = new int[Z];
+            for (L0_GraphicLib2d.Tuple<Zone, Zone> t : di) {
+                distSum[t.a.id] += t.distSq;
+                distSum[t.b.id] += t.distSq;
             }
-            
-            int zex=findMax(distSum);
-            
-            Zone exc=zonesRet.get(zex);
-            
-            zonesRet.remove(exc); 
-            Zret=super.Z-1;
-            
-            System.err.println("remed "+exc+" "+zonesRet);
+
+            int zex = findMax(distSum);
+
+            Zone exc = zonesRet.get(zex);
+
+            zonesRet.remove(exc);
+            Zret = super.Z - 1;
+
+            System.err.println("remed " + exc + " " + zonesRet);
         }
-        
-        
 
         @Override
         void doPrepareOrder() {
@@ -1274,8 +1308,7 @@ public static class L3_b_SecondBot {
         Drone newdrone() {
             return new Drone() {
             };
-            
-            
+
         }
 
         @Override
