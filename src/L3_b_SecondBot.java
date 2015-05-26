@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class L3_b_SecondBot {
 
     static boolean debugPlanner_calcMenace = false;
+    static boolean debugPlanner_mission = true;
 
     public static class Drone extends L1_BaseBotLib.DroneBase implements L0_GraphicLib2d.WithCoord {
 
@@ -96,7 +97,7 @@ public class L3_b_SecondBot {
 
                 @Override
                 public String toString() {
-                    return "MissionAttack{" + "assignedResource=" + assignedResource + ", missionTarget=" + missionTarget + ", done=" + done + '}';
+                    return "{" + "\nR" + assignedResource + "\nT=" + missionTarget + "D:" + done +" U:"+uniqueMission+ '}';
                 }
 
                 List<Drone> assignedResource = new ArrayList<>(L1_BaseBotLib.maxDrones);
@@ -107,11 +108,15 @@ public class L3_b_SecondBot {
                 int life = 1;
                 
                 Zone goalZoneOurs=null;
+                boolean uniqueMission=false;
                 
-                void setGoalZone(Zone theGoal){
-                    if(targetZoneAttacks.contains(theGoal)) throw new RuntimeException("Impossible");
+                void setGoalZone(Zone theGoal,boolean unique){
+                    if(assignedResource.size()>0) throw new RuntimeException();
+                    if(unique && targetZoneAttacks.contains(theGoal)) done=true;
                     targetZoneAttacks.add(theGoal);
                     this.goalZoneOurs=theGoal;
+                    uniqueMission=unique;
+                    if(!done) targetZoneAttacks.add(theGoal);
                 }
 
                 SimpleMissions(L0_GraphicLib2d.WithCoord cible, int life) {
@@ -124,11 +129,13 @@ public class L3_b_SecondBot {
                 }
 
                 void addDrone(Drone d) {
+                    if(done) return;
                     assignedResource.add(d);
                     freeDrone.removeAll(assignedResource);
                 }
 
                 void sendDrones() {
+                    if(done) return;
                     for (Drone d : assignedResource) {
                         _orders[d.id].setLocation(missionTarget.cord());
                     }
@@ -136,6 +143,7 @@ public class L3_b_SecondBot {
                 }
 
                 boolean releaseRessource() {
+                    if(done) return true;
                     
                     if(goalZoneOurs!=null){
                         if(goalZoneOurs.owner==ID){
@@ -157,7 +165,7 @@ public class L3_b_SecondBot {
                     freeDrone.addAll(assignedResource);
                     assignedResource.clear();
                     done = true;
-                    if(goalZoneOurs!=null){
+                    if(uniqueMission && goalZoneOurs!=null){
                         targetZoneAttacks.remove(goalZoneOurs);
                     }
 
@@ -492,18 +500,21 @@ public class L3_b_SecondBot {
                     }                    
                 }
 
-                for(int i=0;i<firstVict.length;i++){
-                    System.err.print("|"+firstVict[i]);
+                if(debugPlanner_mission){
+                    for(int i=0;i<firstVict.length;i++){
+                        System.err.print("|"+firstVict[i]+"//");
+                    }
+                    System.err.println(" Vict_");
                 }
-                System.err.println(" Vict");
                 int fZ=findMin(firstVict);
                 if(firstVict[fZ] <99){
                     // Attacke potentiel
                     final int botPerSector=(int)Math.max(1, (int)(avg_dronePerZone+1));
                     int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
                     if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
-                        SimpleMissions mi = new SimpleMissions(zones.get(fZ), 3);
+                        SimpleMissions mi = new SimpleMissions(zones.get(fZ), 2);
                         mission.add(mi);
+                        mi.setGoalZone(zones.get(fZ), true);
                         for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
                             mi.addDrone(d);
                         }
@@ -600,7 +611,7 @@ public class L3_b_SecondBot {
                     }
 
                     SimpleMissions mi = new SimpleMissions(s.b, (int) (Math.sqrt(s.distSq) / (L1_BaseBotLib.lvl0Dist - 1)) + 1);
-                    mi.setGoalZone(s.b);
+                    mi.setGoalZone(s.b,false);
                     mission.add(mi);
                     mi.addDrone(s.a);
                     planed.add(s.a);
@@ -627,7 +638,7 @@ public class L3_b_SecondBot {
                 attackDefPlaning();
                 mirrorPlaning();
 
-                if (debugPlanner_calcMenace) {
+                if (debugPlanner_mission) {
                     System.err.println("Mission " + mission);
                 }
                 post_plan();
