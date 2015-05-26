@@ -25,6 +25,30 @@ public class L3_b_SecondBot {
 
     static boolean debugPlanner_calcMenace = false;
     static boolean debugPlanner_mission = true;
+    
+            private static int findMin(int[] it){
+                int min=Integer.MAX_VALUE;
+                int ind=-1;
+                
+                for(int i=0;i<it.length;i++){
+                    if(min> it[i]){ min=it[i]; ind=i;}
+                }
+                
+                return ind;
+            
+            }    
+            
+            private static int findMax(int[] it){
+                int max=Integer.MIN_VALUE;
+                int ind=-1;
+                
+                for(int i=0;i<it.length;i++){
+                    if(max< it[i]){ max=it[i]; ind=i;}
+                }
+                
+                return ind;
+            
+            }            
 
     public static class Drone extends L1_BaseBotLib.DroneBase implements L0_GraphicLib2d.WithCoord {
 
@@ -35,13 +59,17 @@ public class L3_b_SecondBot {
         
     }
 
-    public static class Zone extends L1_BaseBotLib.ZoneBase {
+    public static class Zone extends L1_BaseBotLib.ZoneBase implements L0_GraphicLib2d.WithCoord {
     }
 
     public static class PlayerAnalysis extends L1_BaseBotLib.PlayerBase {
     }
 
     public static class Bot extends L1_BaseBotLib.BotBase<Drone, Zone, PlayerAnalysis> {
+        
+        private final List<Zone> zonesRet;
+        private int Zret=0;
+        
 
         public class AttackDefPlanner {
 
@@ -184,14 +212,14 @@ public class L3_b_SecondBot {
 
                 sectorMenace = new ArrayList<>(P);
                 for (int p = 0; p < P; p++) {
-                    sectorMenace.add(new ArrayList<>(Z));
-                    for (int z = 0; z < Z; z++) {
+                    sectorMenace.add(new ArrayList<>(Zret));
+                    for (int z = 0; z < Zret; z++) {
                         sectorMenace.get(p).add(new ArrayList<>(D));
                     }
                 }
 
-                sectorResource = new ArrayList<>(Z);
-                for (int z = 0; z < Z; z++) {
+                sectorResource = new ArrayList<>(Zret);
+                for (int z = 0; z < Zret; z++) {
                     sectorResource.add(new ArrayList<>(D));
                 }
 
@@ -200,17 +228,17 @@ public class L3_b_SecondBot {
             public void calcNamedMenaces() {
                 // Clear
                 for (int p = 0; p < P; p++) {
-                    for (int i = 0; i < Z; i++) {
+                    for (int i = 0; i < Zret; i++) {
                         sectorMenace.get(p).get(i).clear();
                     }
                 }
-                for (int i = 0; i < Z; i++) {
+                for (int i = 0; i < Zret; i++) {
                     sectorResource.get(i).clear();
                 }
 
                 // parcours bots et sector           
-                for (int z = 0; z < Z; z++) {
-                    Zone zo = zones.get(z);
+                for (int z = 0; z < Zret; z++) {
+                    Zone zo = zonesRet.get(z);
 
                     for (int p = 0; p < P; p++) {
                         for (int d = 0; d < D; d++) {
@@ -225,14 +253,14 @@ public class L3_b_SecondBot {
 
                 }
                 for (int p = 0; p < P; p++) {
-                    for (int i = 0; i < Z; i++) {
+                    for (int i = 0; i < Zret; i++) {
                         Collections.sort(sectorMenace.get(p).get(i));
                         if (debugPlanner_calcMenace) {
                             System.err.println("p " + p + " Zone " + i + " eta " + sectorMenace.get(p).get(i));
                         }
                     }
                 }
-                for (int i = 0; i < Z; i++) {
+                for (int i = 0; i < Zret; i++) {
                     Collections.sort(sectorResource.get(i));
                     if (debugPlanner_calcMenace) {
                         System.err.println("Ressource " + " Zone " + i + " eta " + sectorResource.get(i));
@@ -310,10 +338,10 @@ public class L3_b_SecondBot {
                     return;
                 }
 
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> dist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> dist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zonesRet);
                 List<Drone> planed = new ArrayList<>(freeDrone.size());
 
-                int zoneCount[] = new int[Z];
+                int zoneCount[] = new int[Zret];
 
                 double maxDist = 0;
                 for (L0_GraphicLib2d.Tuple<Drone, Zone> s : dist) {
@@ -336,13 +364,13 @@ public class L3_b_SecondBot {
                 int maxPop = 0;
                 int locMax = 0;
 
-                for (int i = 0; i < Z; i++) {
+                for (int i = 0; i < Zret; i++) {
                     if (locMax < zoneCount[i]) {
                         locMax = zoneCount[i];
                         maxPop = i;
                     }
                 }
-                Zone maxWorld = zones.get(maxPop);
+                Zone maxWorld = zonesRet.get(maxPop);
                 System.err.println("Max populated = " + maxWorld);
 
                 for (L0_GraphicLib2d.Tuple<Drone, Zone> s : dist) {
@@ -358,7 +386,7 @@ public class L3_b_SecondBot {
                 System.err.println("Drones to expand " + atMostPopulated);
 
                 List<Zone> otherZones = new ArrayList<>();
-                otherZones.addAll(zones);
+                otherZones.addAll(zonesRet);
                 otherZones.remove(maxWorld);
 
                 double maxDistZ = 0;
@@ -464,35 +492,24 @@ public class L3_b_SecondBot {
 
             }
             
-            private int findMin(int[] it){
-                int min=Integer.MAX_VALUE;
-                int ind=-1;
-                
-                for(int i=0;i<it.length;i++){
-                    if(min> it[i]){ min=it[i]; ind=i;}
-                }
-                
-                return ind;
-            
-            }
 
             public void attackDefPlaning() {
                 if(freeDrone.isEmpty()) return;
                 
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> friendDist = L0_GraphicLib2d.lowestCoupleDist(freeDrone, zones);
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> enDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID^1), zones);
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> friendDist = L0_GraphicLib2d.lowestCoupleDist(freeDrone, zonesRet);
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> enDist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID^1), zonesRet);
                 
-                int[] firstVict=new int[Z];
+                int[] firstVict=new int[Zret];
                 
-                SectorHyp sh[]=new SectorHyp[Z];
-                for(int z=0;z<Z;z++){
-                    sh[z]=new SectorHyp(zones.get(z), friendDist, enDist);
+                SectorHyp sh[]=new SectorHyp[Zret];
+                for(int z=0;z<Zret;z++){
+                    sh[z]=new SectorHyp(zonesRet.get(z), friendDist, enDist);
                     //System.err.println(""+sh[i]);
                     
                     SectorHyp h=sh[z];
                     
                     int fV=h.attackByUsFirstVictory();
-                    if(zones.get(z).owner==ID){
+                    if(zonesRet.get(z).owner==ID){
                         firstVict[z]=666;
                     }else{
                         if(fV<0) firstVict[z]=1000;else
@@ -512,9 +529,9 @@ public class L3_b_SecondBot {
                     final int botPerSector=(int)Math.max(1, (int)(avg_dronePerZone+1));
                     int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
                     if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
-                        SimpleMissions mi = new SimpleMissions(zones.get(fZ), 2);
+                        SimpleMissions mi = new SimpleMissions(zonesRet.get(fZ), 2);
                         mission.add(mi);
-                        mi.setGoalZone(zones.get(fZ), true);
+                        mi.setGoalZone(zonesRet.get(fZ), true);
                         for(Drone d : sh[fZ].fr.get(firstVict[fZ])){
                             mi.addDrone(d);
                         }
@@ -532,7 +549,7 @@ public class L3_b_SecondBot {
                 List<Drone> marked = new ArrayList<>(D);
 
                 List<Zone> friendly = new ArrayList<>(D);
-                friendly.addAll(zones);
+                friendly.addAll(zonesRet);
 
                 for (L0_GraphicLib2d.Tuple<Drone, Drone> s : dist) {
                     if (!freeDrone.contains(s.a)) {
@@ -585,7 +602,7 @@ public class L3_b_SecondBot {
                 }
                 once = false;
 
-                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> dist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zones);
+                final List<L0_GraphicLib2d.Tuple<Drone, Zone>> dist = L0_GraphicLib2d.lowestCoupleDist(playerDrones.get(ID), zonesRet);
                 List<Drone> planed = new ArrayList<>(freeDrone.size());
 
                 double maxDist = 0;
@@ -622,10 +639,10 @@ public class L3_b_SecondBot {
             public void plan() {
                 pre_plan();
 
-                List<Zone> mine = new ArrayList<>(Z);
-                List<Zone> ene = new ArrayList<>(Z);
+                List<Zone> mine = new ArrayList<>(Zret);
+                List<Zone> ene = new ArrayList<>(Zret);
 
-                for (Zone zr : zones) {
+                for (Zone zr : zonesRet) {
                     if (zr.owner == ID || (zr.owner == -1 && P == 2)) {
                         mine.add(zr);
                     } else {
@@ -653,7 +670,32 @@ public class L3_b_SecondBot {
 
         public Bot(InputStream inst) {
             super(inst);
+            this.zonesRet=new ArrayList<>(Zret);
         }
+
+        @Override
+        protected void alloc() {
+            super.alloc(); //To change body of generated methods, choose Tools | Templates.
+            this.zonesRet.addAll(super.zones);
+            
+            List<L0_GraphicLib2d.Tuple<Zone,Zone>> di=L0_GraphicLib2d.lowestCoupleDist(zonesRet, zonesRet);
+            int distSum[]=new int[Z];
+            for(L0_GraphicLib2d.Tuple<Zone,Zone> t : di){
+                distSum[t.a.id]+=t.distSq;
+                distSum[t.b.id]+=t.distSq;
+            }
+            
+            int zex=findMax(distSum);
+            
+            Zone exc=zonesRet.get(zex);
+            
+            zonesRet.remove(exc); 
+            Zret=super.Z-1;
+            
+            System.err.println("remed "+exc+" "+zonesRet);
+        }
+        
+        
 
         @Override
         void doPrepareOrder() {

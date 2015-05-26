@@ -41,6 +41,13 @@ public class L1_BaseBotLib {
     public static class GamePos implements L0_GraphicLib2d.WithCoord {
 
         final Point cord = new Point(0, 0);
+        
+        public GamePos(){
+        }
+        
+        public GamePos(Point p){
+            cord.setLocation(p);
+        }
 
         @Override
         public Point cord() {
@@ -228,7 +235,7 @@ public class L1_BaseBotLib {
 
         private boolean init = false;
 
-        private void alloc() {
+        protected void alloc() {
             init = true;
             for (int p = 0; p < P; p++) {
                 Pt n = newplayer();
@@ -240,6 +247,7 @@ public class L1_BaseBotLib {
                 Zt n = newzone();
                 n.id = z;
                 zones.add(n);
+                n.cord.setLocation(this._worldZoneCoord[z]);
             }
             for (int p = 0; p < P; p++) {
                 for (int d = 0; d < D; d++) {
