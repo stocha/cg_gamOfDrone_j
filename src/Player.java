@@ -181,7 +181,6 @@ class Player {
     }     
     
 }
-
 public static class L1_BaseBotLib {
     
     private static boolean debug_base=true;
@@ -534,8 +533,7 @@ public static class L1_BaseBotLib {
     }
 }
 
-
-public static  class L3_b_SecondBot {
+public static class L3_b_SecondBot {
 
     static boolean debugPlanner_calcMenace = false;
     static boolean debugPlanner_mission = true;
@@ -557,7 +555,6 @@ public static  class L3_b_SecondBot {
                 int ind=-1;
                 
                 for(int i=0;i<it.length;i++){
-                    System.err.println("?"+it[i]);
                     if(max< it[i]){ max=it[i]; ind=i;}
                 }
                 
@@ -1041,7 +1038,7 @@ public static  class L3_b_SecondBot {
                 int fZ=findMin(firstVict);
                 if(firstVict[fZ] <99){
                     // Attacke potentiel
-                    final int botPerSector=(int)Math.max(1, (int)(avg_dronePerZone+1));
+                    final int botPerSector=100;//(int)Math.max(1, (int)(avg_dronePerZone+1));
                     int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
                     if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
                         SimpleMissions mi = new SimpleMissions(zonesRet.get(fZ), 2);
@@ -1196,9 +1193,8 @@ public static  class L3_b_SecondBot {
             List<L0_GraphicLib2d.Tuple<Zone,Zone>> di=L0_GraphicLib2d.lowestCoupleDist(zonesRet, zonesRet);
             int distSum[]=new int[Z];
             for(L0_GraphicLib2d.Tuple<Zone,Zone> t : di){
-                System.err.println("dist "+t.distSq+" "+t.a+" "+t.b);
-                distSum[t.a.id]+=(int)t.distSq;
-                distSum[t.b.id]+=(int)t.distSq;
+                distSum[t.a.id]+=t.distSq;
+                distSum[t.b.id]+=t.distSq;
             }
             
             int zex=findMax(distSum);

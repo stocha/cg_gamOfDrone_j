@@ -526,7 +526,7 @@ public class L3_b_SecondBot {
                 int fZ=findMin(firstVict);
                 if(firstVict[fZ] <99){
                     // Attacke potentiel
-                    final int botPerSector=(int)Math.max(1, (int)(avg_dronePerZone+1));
+                    final int botPerSector=100;//(int)Math.max(1, (int)(avg_dronePerZone+1));
                     int nbToSuccess=sh[fZ].fr.get(firstVict[fZ]).size();
                     if(nbToSuccess<=botPerSector || firstVict[fZ] < 3){
                         SimpleMissions mi = new SimpleMissions(zonesRet.get(fZ), 2);
