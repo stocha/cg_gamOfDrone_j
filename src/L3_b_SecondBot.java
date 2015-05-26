@@ -474,12 +474,16 @@ public class L3_b_SecondBot {
 
                 }
 
-                public int defByUsFirstVictory() {
+                public int defByUsFirstVictory(int nbMaxDef) {
                     int res = -1;
 
                     for (int i = 0; i < nbTurnsPlan; i++) {
+                        if(fr.get(i).size()> nbMaxDef) return i-1;
+                        
                         if (en.get(i).size() > fr.get(i).size()) {
                             return i - 1;
+                        }else{
+                        
                         }
                     }
 
@@ -564,18 +568,11 @@ public class L3_b_SecondBot {
 
                     int fV = h.attackByUsFirstVictory();
                     if (zonesRet.get(z).owner == ID) {
-                        int fD = h.defByUsFirstVictory();
+                        int fD = h.defByUsFirstVictory((int)avg_dronePerLegitimateZone);
                         if (fD < 0) {
                             firstVict[z] = 666;
                         } else {
-                            int nbToSuccess = sh[z].fr.get(fD).size(); // defense
-
-                            if (nbToSuccess > avg_dronePerLegitimateZone) {
-
                                 firstVict[z] = fD;
-                            } else {
-                                firstVict[z] = 666;
-                            }
                         }
                     } else {
                         if (fV < 0) {
@@ -730,7 +727,7 @@ public class L3_b_SecondBot {
                 attackDefPlaning();
                 attackDefPlaning();
 
-                mirrorPlaning();
+                //mirrorPlaning();
 
                 if (debugPlanner_mission) {
                     System.err.println("Mission " + mission);
